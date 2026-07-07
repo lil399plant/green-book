@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantPrep — Master the Green Book</title>
+<style>
+  :root{
+    /* Palette: "trading terminal at 5am" — deep slate, phosphor mint, amber alert, muted paper */
+    --bg:#0e1418;
+    --panel:#151d23;
+    --panel-2:#1b262e;
+    --line:#26343d;
+    --ink:#e6eef2;
+    --ink-dim:#8ba0ac;
+    --ink-faint:#5d7280;
+    --mint:#5be6b0;        /* signature phosphor */
+    --mint-deep:#2fbf8f;
+    --amber:#f2b45c;
+    --rose:#f0736b;
+    --violet:#9d8cf0;
+    --mono:"SFMono-Regular",ui-monospace,"Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:"Georgia","Times New Roman",serif; /* body: bookish, it IS a book */
+    --ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(91,230,176,.06), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  a{color:var(--mint)}
+  ::selection{background:rgba(91,230,176,.3);color:#fff}
+
+  /* ---------- shell ---------- */
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+  header.top{
+    position:sticky;top:0;z-index:40;
+    backdrop-filter:blur(10px);
+    background:linear-gradient(180deg, rgba(14,20,24,.96), rgba(14,20,24,.78));
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{max-width:1080px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .brand{display:flex;align-items:baseline;gap:10px;font-family:var(--ui);font-weight:700;letter-spacing:-.02em}
+  .brand .mark{
+    font-family:var(--mono);font-size:13px;color:var(--bg);background:var(--mint);
+    padding:3px 7px;border-radius:5px;font-weight:700;letter-spacing:0;
+    box-shadow:0 0 18px rgba(91,230,176,.35);
+  }
+  .brand .name{font-size:19px}
+  .brand .sub{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.04em}
+  nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+  nav.tabs button{
+    font-family:var(--ui);font-size:13px;font-weight:600;color:var(--ink-dim);
+    background:transparent;border:1px solid transparent;border-radius:8px;
+    padding:7px 13px;cursor:pointer;transition:.15s;
+  }
+  nav.tabs button:hover{color:var(--ink);background:var(--panel)}
+  nav.tabs button[aria-selected="true"]{color:var(--mint);background:var(--panel);border-color:var(--line)}
+  .streak{
+    font-family:var(--mono);font-size:12px;color:var(--amber);
+    border:1px solid var(--line);border-radius:8px;padding:6px 10px;white-space:nowrap;
+  }
+
+  h1,h2,h3{font-family:var(--ui);letter-spacing:-.02em;line-height:1.15}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:46px 0 30px;border-bottom:1px solid var(--line)}
+  .hero h1{font-size:clamp(30px,6vw,52px);margin:12px 0 14px;font-weight:800}
+  .hero h1 em{font-style:normal;color:var(--mint)}
+  .hero p{max-width:620px;color:var(--ink-dim);font-size:17px;margin:0}
+  .ticker{
+    margin-top:26px;display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;
+    font-family:var(--mono);font-size:12px;scrollbar-width:thin;
+  }
+  .ticker .chip{
+    flex:0 0 auto;border:1px solid var(--line);border-radius:999px;padding:6px 13px;
+    color:var(--ink-dim);background:var(--panel);white-space:nowrap;
+  }
+  .ticker .chip b{color:var(--mint);font-weight:700}
+
+  /* ---------- generic panels ---------- */
+  .grid{display:grid;gap:16px}
+  .cards-3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;
+  }
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card .big{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--mint);line-height:1}
+  .card .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
+  .bar{height:7px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin-top:12px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--mint-deep),var(--mint));transition:width .5s}
+
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:34px 0 16px;flex-wrap:wrap}
+  .section-head h2{font-size:24px;margin:4px 0 0}
+
+  button.btn{
+    font-family:var(--ui);font-weight:600;font-size:14px;cursor:pointer;
+    border-radius:9px;padding:10px 16px;border:1px solid var(--line);
+    background:var(--panel-2);color:var(--ink);transition:.15s;
+  }
+  button.btn:hover{border-color:var(--mint-deep);color:var(--mint)}
+  button.btn.primary{background:var(--mint);color:#062018;border-color:transparent;box-shadow:0 0 20px rgba(91,230,176,.25)}
+  button.btn.primary:hover{color:#062018;filter:brightness(1.05)}
+  button.btn.ghost{background:transparent}
+  button.btn:disabled{opacity:.4;cursor:not-allowed}
+  button.btn:focus-visible,nav.tabs button:focus-visible,.filter button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+
+  /* ---------- module filter ---------- */
+  .filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .filter button{
+    font-family:var(--mono);font-size:12px;color:var(--ink-dim);
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.15s;
+  }
+  .filter button:hover{color:var(--ink)}
+  .filter button[data-on="1"]{color:var(--bg);background:var(--mint);border-color:transparent;font-weight:700}
+
+  /* ---------- problem list ---------- */
+  .plist{display:flex;flex-direction:column;gap:10px}
+  .prob{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:.15s;
+  }
+  .prob.open{border-color:var(--mint-deep)}
+  .prob .phead{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer}
+  .prob .phead:hover{background:var(--panel-2)}
+  .prob .tag{
+    font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+    padding:3px 8px;border-radius:6px;white-space:nowrap;border:1px solid var(--line);color:var(--ink-dim);
+  }
+  .tag.m0{color:var(--mint);border-color:rgba(91,230,176,.35)}
+  .tag.m1{color:var(--violet);border-color:rgba(157,140,240,.35)}
+  .tag.m2{color:var(--amber);border-color:rgba(242,180,92,.35)}
+  .tag.m3{color:var(--rose);border-color:rgba(240,115,107,.35)}
+  .prob .ptitle{font-family:var(--ui);font-weight:600;font-size:16px;flex:1;min-width:0}
+  .prob .ptopic{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .prob .dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:0 0 auto}
+  .prob .dot.done{background:var(--mint);box-shadow:0 0 10px rgba(91,230,176,.6)}
+  .prob .body{display:none;padding:4px 18px 20px;border-top:1px solid var(--line)}
+  .prob.open .body{display:block}
+  .prob .q{font-size:16px;color:var(--ink);margin:16px 0}
+  .reveal-box{
+    background:var(--panel-2);border:1px dashed var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;
+  }
+  .reveal-box .rh{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .reveal-box.sol{border-style:solid;border-color:rgba(91,230,176,.25)}
+  .reveal-box .ans{font-family:var(--mono);color:var(--mint);font-size:15px;font-weight:700}
+  .prob .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .kbd{font-family:var(--mono);font-size:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink-dim)}
+  code{font-family:var(--mono);background:var(--panel-2);padding:1px 5px;border-radius:4px;font-size:.92em;color:var(--amber)}
+
+  /* ---------- coach ---------- */
+  .coach{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+  .coach .rh{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .coach .rh .live{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint)}
+  .coach-thread{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+  .msg{border-radius:10px;padding:11px 14px;font-size:14.5px;max-width:92%;white-space:pre-wrap;word-wrap:break-word}
+  .msg.me{align-self:flex-end;background:var(--panel-2);border:1px solid var(--line);color:var(--ink)}
+  .msg.coach-msg{align-self:flex-start;background:rgba(91,230,176,.07);border:1px solid rgba(91,230,176,.22);color:var(--ink)}
+  .msg.coach-msg b{color:var(--mint)}
+  .msg.coach-msg code{background:rgba(0,0,0,.25)}
+  .msg.err{align-self:flex-start;background:rgba(240,115,107,.08);border:1px solid rgba(240,115,107,.3);color:var(--rose);font-family:var(--mono);font-size:13px}
+  .msg.thinking{align-self:flex-start;color:var(--ink-faint);font-family:var(--mono);font-size:13px;border:1px dashed var(--line);background:transparent}
+  .msg.thinking::after{content:"▋";animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .coach-input{display:flex;gap:10px;align-items:flex-end}
+  .coach-ta{
+    flex:1;resize:vertical;min-height:52px;max-height:180px;font-family:var(--ui);font-size:14.5px;
+    background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 13px;line-height:1.45;
+  }
+  .coach-ta:focus{outline:none;border-color:var(--mint-deep)}
+  .coach-ta::placeholder{color:var(--ink-faint)}
+  .coach-hint-note{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px}
+
+  /* ---------- market connection ---------- */
+  .reveal-box.mkt{border-color:rgba(157,140,240,.35);background:rgba(157,140,240,.06)}
+  .reveal-box.mkt .rh{color:var(--violet)}
+  /* ---------- related-problem highlight ---------- */
+  .prob.flash{border-color:var(--amber)!important;box-shadow:0 0 0 1px var(--amber),0 0 26px rgba(242,180,92,.22)}
+
+  /* ---------- flashcards ---------- */
+  .fc-stage{display:flex;flex-direction:column;align-items:center;gap:20px;padding-top:8px}
+  .flashcard{
+    width:100%;max-width:640px;min-height:320px;perspective:1600px;cursor:pointer;
+  }
+  .fc-inner{position:relative;width:100%;min-height:320px;transition:transform .5s;transform-style:preserve-3d}
+  .flashcard.flipped .fc-inner{transform:rotateY(180deg)}
+  .fc-face{
+    position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    border:1px solid var(--line);border-radius:18px;padding:34px;display:flex;flex-direction:column;
+    background:var(--panel);
+  }
+  .fc-back{transform:rotateY(180deg);background:var(--panel-2);border-color:rgba(91,230,176,.25)}
+  .fc-face .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .fc-face .prompt{font-size:20px;color:var(--ink);flex:1;display:flex;align-items:center}
+  .fc-face .hintline{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-top:auto;padding-top:16px}
+  .fc-face .ans{font-family:var(--mono);color:var(--mint);font-weight:700}
+  .fc-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .box-pips{display:flex;gap:5px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .box-pips i{width:8px;height:8px;border-radius:2px;background:var(--panel-2);border:1px solid var(--line)}
+  .box-pips i.fill{background:var(--mint)}
+
+  /* ---------- quiz ---------- */
+  .quiz-shell{max-width:720px;margin:0 auto}
+  .quiz-hud{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:13px;color:var(--ink-dim);margin-bottom:14px}
+  .quiz-hud .timer{color:var(--amber)}
+  .quiz-hud .score{color:var(--mint)}
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px}
+  .qcard .qtext{font-size:19px;margin:8px 0 20px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{
+    text-align:left;font-family:var(--ui);font-size:15px;color:var(--ink);
+    background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;transition:.12s;
+  }
+  .opt:hover{border-color:var(--mint-deep)}
+  .opt.correct{border-color:var(--mint);background:rgba(91,230,176,.12);color:var(--mint)}
+  .opt.wrong{border-color:var(--rose);background:rgba(240,115,107,.1);color:var(--rose)}
+  .opt.correct::after{content:" ✓";font-family:var(--mono)}
+  .opt.wrong::after{content:" ✗";font-family:var(--mono)}
+  .opt:disabled{cursor:default}
+  .qexpl{margin-top:16px;font-size:14px;color:var(--ink-dim);border-top:1px solid var(--line);padding-top:14px;display:none}
+  .qexpl.show{display:block}
+  .quiz-done{text-align:center;padding:20px}
+  .quiz-done .score-big{font-family:var(--mono);font-size:64px;font-weight:800;color:var(--mint);line-height:1}
+
+  .empty{color:var(--ink-faint);font-family:var(--mono);font-size:13px;padding:40px 0;text-align:center}
+  footer{border-top:1px solid var(--line);margin-top:50px;padding-top:20px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .hist-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);color:var(--ink-dim)}
+  .hist-row b{color:var(--mint)}
+  .view{display:none}
+  .view.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--mint);color:#062018;font-family:var(--ui);font-weight:700;font-size:14px;
+    padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:80;
+    box-shadow:0 6px 30px rgba(0,0,0,.5);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ---------- settings gear + modal ---------- */
+  .gear{font-size:18px;line-height:1;background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+    border-radius:8px;padding:7px 10px;cursor:pointer;transition:.15s}
+  .gear:hover{color:var(--mint);border-color:var(--mint-deep)}
+  .gear:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+  .gear .badge{font-family:var(--mono);font-size:10px;margin-left:6px;color:var(--ink-faint)}
+  .modal-back{position:fixed;inset:0;z-index:90;background:rgba(6,10,12,.72);backdrop-filter:blur(4px);
+    display:none;align-items:flex-start;justify-content:center;padding:6vh 16px}
+  .modal-back.open{display:flex;animation:fade .2s}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:min(560px,100%);
+    max-height:88vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}
+  .modal-head{display:flex;align-items:center;gap:10px;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+  .modal-head h2{font-size:18px;margin:0;font-family:var(--ui)}
+  .modal-head .x{margin-left:auto;background:transparent;border:none;color:var(--ink-dim);font-size:22px;cursor:pointer;line-height:1;padding:2px 8px;border-radius:6px}
+  .modal-head .x:hover{color:var(--ink);background:var(--panel-2)}
+  .modal-body{padding:20px 22px}
+  .modal-body p.note{color:var(--ink-dim);font-size:13.5px;margin:0 0 16px}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .field input,.field select{width:100%;font-family:var(--ui);font-size:14px;background:var(--panel-2);color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--mint-deep)}
+  .field .hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:5px}
+  .keyrow{display:flex;gap:8px}
+  .keyrow input{flex:1}
+  .set-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+  #setStatus{font-family:var(--mono);font-size:12.5px;margin-left:auto}
+  #setStatus.ok{color:var(--mint)} #setStatus.bad{color:var(--rose)} #setStatus.busy{color:var(--amber)}
+  .privacy{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border-top:1px solid var(--line);margin-top:18px;padding-top:14px;line-height:1.6}
+
+  /* ---------- floating tutor ---------- */
+  .fab{
+    position:fixed;bottom:22px;right:22px;z-index:70;
+    width:58px;height:58px;border-radius:50%;border:1px solid var(--mint-deep);
+    background:var(--mint);color:#062018;font-size:24px;cursor:pointer;
+    box-shadow:0 8px 30px rgba(0,0,0,.45),0 0 24px rgba(91,230,176,.35);
+    display:flex;align-items:center;justify-content:center;transition:.18s;
+  }
+  .fab:hover{filter:brightness(1.06);transform:translateY(-1px)}
+  .fab:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+  .chatpanel{
+    position:fixed;bottom:92px;right:22px;z-index:71;width:min(400px,calc(100vw - 32px));
+    height:min(560px,calc(100vh - 130px));display:none;flex-direction:column;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 18px 60px rgba(0,0,0,.55);
+  }
+  .chatpanel.open{display:flex;animation:fade .22s}
+  .chat-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+  .chat-head .live{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint)}
+  .chat-head h3{font-size:15px;margin:0;font-family:var(--ui)}
+  .chat-head .sub{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .chat-head .x{margin-left:auto;background:transparent;border:none;color:var(--ink-dim);font-size:20px;cursor:pointer;line-height:1;padding:4px 6px;border-radius:6px}
+  .chat-head .x:hover{color:var(--ink);background:var(--panel)}
+  .chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+  .chat-body .msg{font-size:14px;line-height:1.5}
+  .chat-empty{color:var(--ink-faint);font-family:var(--mono);font-size:12.5px;text-align:center;margin:auto;padding:0 10px;line-height:1.7}
+  .chat-empty .sugg{display:block;color:var(--mint);cursor:pointer;margin-top:6px}
+  .chat-empty .sugg:hover{text-decoration:underline}
+  .chat-foot{border-top:1px solid var(--line);padding:12px;display:flex;gap:8px;align-items:flex-end;background:var(--panel-2)}
+  .chat-ta{flex:1;resize:none;min-height:42px;max-height:120px;font-family:var(--ui);font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.4}
+  .chat-ta:focus{outline:none;border-color:var(--mint-deep)}
+  .chat-send{flex:0 0 auto}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark">Σ</span>
+      <span class="name">QuantPrep</span>
+      <span class="sub">// the green book, drilled</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="dash" aria-selected="true">Dashboard</button>
+      <button role="tab" data-view="learn" aria-selected="false">Learn</button>
+      <button role="tab" data-view="cards" aria-selected="false">Flashcards</button>
+      <button role="tab" data-view="quiz" aria-selected="false">Quiz</button>
+    </nav>
+    <button class="gear" id="gearBtn" title="AI provider settings" aria-label="AI provider settings">⚙</button>
+    <div class="streak" id="streakBox">🔥 0-day streak</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="view active" id="view-dash">
+    <div class="hero">
+      <div class="eyebrow">Xinfeng Zhou · A Practical Guide to Quantitative Finance Interviews</div>
+      <h1>Drill the patterns until the <em>aha</em> is automatic.</h1>
+      <p>Every problem here rewards a technique, not a trick — simplification, symmetry, induction, conditioning, martingales. Learn them once, recognize them everywhere.</p>
+      <div class="ticker" id="ticker"></div>
+    </div>
+
+    <div class="section-head"><div><div class="eyebrow">Mastery</div><h2>Where you stand</h2></div>
+      <button class="btn ghost" id="resetBtn">Reset progress</button>
+    </div>
+    <div class="grid cards-3" id="moduleCards"></div>
+
+    <div class="section-head"><div><div class="eyebrow">Quiz log</div><h2>Recent sessions</h2></div></div>
+    <div class="card" id="histCard"><div class="empty">No quizzes yet. Head to the Quiz tab and set a baseline.</div></div>
+
+    <footer>Content adapted from the problems &amp; solutions in the Zhou "green book." Progress saves automatically to this artifact.</footer>
+  </section>
+
+  <!-- ============ LEARN ============ -->
+  <section class="view" id="view-learn">
+    <div class="section-head"><div><div class="eyebrow">Study mode</div><h2>Browse &amp; reveal</h2></div></div>
+    <div class="filter" id="learnFilter"></div>
+    <div class="plist" id="probList"></div>
+  </section>
+
+  <!-- ============ FLASHCARDS ============ -->
+  <section class="view" id="view-cards">
+    <div class="section-head"><div><div class="eyebrow">Spaced repetition · Leitner</div><h2>Flashcards</h2></div>
+      <div class="box-pips" id="deckState"></div>
+    </div>
+    <div class="fc-stage">
+      <div class="flashcard" id="flashcard" tabindex="0" aria-label="Flashcard, click or press space to flip">
+        <div class="fc-inner">
+          <div class="fc-face fc-front">
+            <div class="meta"><span class="tag" id="fcTag">—</span><span class="ptopic" id="fcTopic"></span></div>
+            <div class="prompt" id="fcPrompt">Loading deck…</div>
+            <div class="hintline">Click card to flip · <span class="kbd">Space</span></div>
+          </div>
+          <div class="fc-face fc-back">
+            <div class="meta"><span class="ptopic">Answer</span><span class="ptopic" id="fcBox"></span></div>
+            <div class="prompt"><div id="fcAnswer" class="ans"></div></div>
+            <div class="hintline" id="fcNote"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="btn" id="fcMiss">Missed it — <span class="kbd">←</span></button>
+        <button class="btn primary" id="fcGot">Got it — <span class="kbd">→</span></button>
+      </div>
+      <div class="ptopic" id="fcProgress" style="font-family:var(--mono);font-size:12px;color:var(--ink-faint)"></div>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="view" id="view-quiz">
+    <div class="section-head"><div><div class="eyebrow">Timed · scored</div><h2>Quiz</h2></div></div>
+    <div class="quiz-shell" id="quizShell"></div>
+  </section>
+
+</div>
+
+<button class="fab" id="fab" aria-label="Open the tutor chat" title="Ask the tutor">💬</button>
+<div class="chatpanel" id="chatpanel" role="dialog" aria-label="Tutor chat">
+  <div class="chat-head">
+    <span class="live"></span>
+    <div><h3>Ask the tutor</h3><div class="sub">quant interview help · powered by Claude</div></div>
+    <button class="x" id="chatClose" aria-label="Close chat">×</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-empty" id="chatEmpty">
+      Ask anything — a concept, a hint, or how a technique maps to markets.
+      <span class="sugg" data-q="Explain Itô's lemma with a simple intuition.">“Explain Itô's lemma simply”</span>
+      <span class="sugg" data-q="What's the intuition behind risk-neutral pricing?">“Intuition for risk-neutral pricing”</span>
+      <span class="sugg" data-q="Give me a hint for the gambler's ruin problem without the answer.">“Hint for gambler's ruin”</span>
+    </div>
+  </div>
+  <div class="chat-foot">
+    <textarea class="chat-ta" id="chatInput" placeholder="Ask a question…" rows="1"></textarea>
+    <button class="btn primary chat-send" id="chatSend">Send</button>
+  </div>
+</div>
+
+<div class="modal-back" id="setBack" role="dialog" aria-modal="true" aria-label="AI provider settings">
+  <div class="modal">
+    <div class="modal-head"><h2>⚙ AI provider</h2><button class="x" id="setClose" aria-label="Close">×</button></div>
+    <div class="modal-body">
+      <p class="note">The coach, related-problem coaching, and the tutor chat all run through one AI provider. Inside Claude this uses the built-in runtime automatically. To self-host (e.g. GitHub Pages), pick a provider and paste your key.</p>
+
+      <div class="field">
+        <label for="setPreset">Quick preset</label>
+        <select id="setPreset">
+          <option value="">— choose a provider —</option>
+          <option value="artifact">Claude (built-in, only works inside a Claude Artifact)</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="openai">OpenAI</option>
+          <option value="groq">Groq</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="ollama">Ollama (local)</option>
+          <option value="anthropic">Anthropic (API key)</option>
+          <option value="custom">Custom (OpenAI-compatible)</option>
+        </select>
+        <div class="hint">Presets fill in the endpoint and a default model — you can edit them below.</div>
+      </div>
+
+      <div class="field">
+        <label for="setProvider">Mode</label>
+        <select id="setProvider">
+          <option value="artifact">artifact — Claude runtime (no key)</option>
+          <option value="openai">openai-compatible — /chat/completions</option>
+          <option value="anthropic">anthropic — /v1/messages + key</option>
+        </select>
+      </div>
+
+      <div class="field" id="rowBase">
+        <label for="setBase">API base URL</label>
+        <input id="setBase" type="text" spellcheck="false" placeholder="https://api.deepseek.com">
+        <div class="hint">For OpenAI-compatible providers the app calls <code>{base}/chat/completions</code>.</div>
+      </div>
+
+      <div class="field" id="rowModel">
+        <label for="setModel">Model</label>
+        <input id="setModel" type="text" spellcheck="false" placeholder="deepseek-chat">
+      </div>
+
+      <div class="field" id="rowKey">
+        <label for="setKeyInput">API key</label>
+        <div class="keyrow">
+          <input id="setKeyInput" type="password" spellcheck="false" autocomplete="off" placeholder="sk-…">
+          <button class="btn" id="setKeyShow" type="button">Show</button>
+        </div>
+        <div class="hint">Stored only in this browser. Never uploaded anywhere except your chosen provider.</div>
+      </div>
+
+      <div class="set-actions">
+        <button class="btn primary" id="setSave">Save</button>
+        <button class="btn" id="setTest">Test connection</button>
+        <button class="btn ghost" id="setArtifact">Use built-in Claude</button>
+        <span id="setStatus"></span>
+      </div>
+
+      <div class="privacy">Your key is saved with <code>localStorage</code> on this device only. Requests go straight from your browser to the provider you set. Some providers require CORS/browser access to be enabled on your account. Nothing is proxied through this app.</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA  — problems distilled from the Zhou green book.
+   module: 0 Brain Teasers · 1 Probability · 2 Stochastic · 3 Finance
+   Each: id, module, topic, title, q(question), hint, sol(solution html),
+   ans(short answer for flashcards), quiz{stem, options[], correct index}
+   ============================================================ */
+const MODULES = [
+  {key:0, name:"Brain Teasers & Logic", tag:"m0", blurb:"Simplification, symmetry, pigeonhole, induction, modular arithmetic, contradiction."},
+  {key:1, name:"Probability Theory", tag:"m1", blurb:"Conditioning, Bayes, symmetry, combinatorics, expectation, order statistics."},
+  {key:2, name:"Stochastic Processes", tag:"m2", blurb:"Markov chains, random walks, martingales, Brownian motion, Itô's lemma."},
+  {key:3, name:"Finance & Options", tag:"m3", blurb:"Put-call parity, Black-Scholes, the Greeks, exotics, portfolio & risk."}
+];
+
+const P = [
+/* ---------------- BRAIN TEASERS ---------------- */
+{id:"pirates",module:0,topic:"Simplification",title:"Screwy pirates",
+ q:"Five rational, bloodthirsty pirates split 100 gold coins. The most senior proposes a split; all pirates (including the proposer) vote. If ≥50% accept, it passes; otherwise the proposer is thrown overboard and the next-senior proposes. Each pirate wants (1) to live, (2) maximum gold, (3) fewer pirates. How is the gold divided?",
+ hint:"Solve tiny cases first. What happens with 1 pirate? 2? 3? Work up to 5.",
+ sol:"Reason backward. With 2 pirates, senior takes all (his own vote is 50%). So pirate&nbsp;1 gets nothing if it reaches 2 pirates — he'll accept any coin earlier. Building up, the senior of 5 buys the cheapest majority: he needs 2 more votes, so he pays 1 coin each to the pirates who'd get nothing in the next round (pirates 1 and 3).",
+ ans:"98, 0, 1, 0, 1  — senior keeps 98, bribes pirates 1 and 3 with one coin each.",
+ quiz:{stem:"With 5 pirates and 100 coins, how much does the most senior pirate keep?",options:["100","98","96","50"],correct:1}},
+
+{id:"tiger",module:0,topic:"Simplification",title:"Tiger and sheep",
+ q:"100 tigers and 1 sheep are on a magic island with only grass. Tigers prefer sheep, but any tiger that eats the sheep becomes a sheep itself. All are perfectly rational and want to survive. Is the sheep eaten?",
+ hint:"Start with 1 tiger, then 2, then 3 — find the parity pattern.",
+ sol:"1 tiger: eats it (safe afterward). 2 tigers: neither eats — whoever does becomes prey for the other. 3 tigers: the eater becomes 1-of-2, which is the safe case, so it's eaten. The outcome alternates: odd number of tigers → sheep eaten; even → safe. With 100 (even) tigers, the sheep is safe.",
+ ans:"Not eaten. Even # of tigers ⇒ safe; odd ⇒ eaten. 100 is even.",
+ quiz:{stem:"With 100 tigers and 1 sheep (all rational), is the sheep eaten?",options:["Yes, immediately","No — 100 is even","Only if a tiger is hungry","Impossible to say"],correct:1}},
+
+{id:"river",module:0,topic:"Logic Reasoning",title:"River crossing",
+ q:"Four people (A,B,C,D) must cross a bridge at night with one torch; at most 2 cross at a time, moving at the slower person's pace. Times: A=10, B=5, C=2, D=1 minutes. Minimum total time to get all across?",
+ hint:"The two slowest should cross together — but who ferries the torch back?",
+ sol:"Send the two fastest first to shuttle the torch. D&amp;C over (2), D back (1), A&amp;B over (10), C back (2), C&amp;D over (2) = 17 minutes. Sending the two slowest together is the key move; the fast pair pays the return trips.",
+ ans:"17 minutes.",
+ quiz:{stem:"Bridge crossing with times 1,2,5,10 — minimum total?",options:["19","17","15","21"],correct:1}},
+
+{id:"birthday-boss",module:0,topic:"Logic Reasoning",title:"Boss's birthday",
+ q:"Boss's birthday is one of: Mar 4/5/8, Jun 4/7, Sep 1/5, Dec 1/2/8. A knows the month, C knows the day. A: “I don't know the birthday, and I know C doesn't either.” C: “I didn't know, but now I do.” A: “Now I know too.” When is it?",
+ hint:"A being sure C doesn't know rules out unique days (7 in Jun, 2 in Dec).",
+ sol:"A knows C is unsure ⇒ month can't contain a unique day (7,2) ⇒ eliminate Jun and Dec. Remaining: Mar 4/5/8, Sep 1/5. C now knows ⇒ the day is unique among these ⇒ not the 5 (appears twice). A now knows ⇒ month has a single candidate ⇒ not March (Mar 4 & Mar 8 both remain). So it's September 1.",
+ ans:"September 1.",
+ quiz:{stem:"After all three statements, the boss's birthday is:",options:["Mar 4","Jun 7","Sep 1","Dec 2"],correct:2}},
+
+{id:"ropes",module:0,topic:"Logic Reasoning",title:"Burning ropes",
+ q:"Two ropes each burn in 1 hour, but unevenly (rate varies along the rope). Using only these, measure exactly 45 minutes.",
+ hint:"Lighting a rope at both ends burns it in half its total time, regardless of unevenness.",
+ sol:"Light rope 1 at BOTH ends and rope 2 at ONE end simultaneously. Rope 1 finishes at 30 min. At that instant light rope 2's other end; its remaining 30-min worth now burns from both ends → 15 more min. Total 45 minutes.",
+ ans:"Rope1 both ends + rope2 one end; at 30min light rope2's other end → 45.",
+ quiz:{stem:"Two uneven 1-hour ropes — which times are measurable this way?",options:["Only 30 & 60","15, 30, 45, 60","Any minute","Only 45"],correct:1}},
+
+{id:"ball12",module:0,topic:"Logic Reasoning",title:"Defective ball (12 balls)",
+ q:"12 identical balls; one is heavier OR lighter (unknown which). Using a balance (tells only which side is heavier), find the odd ball AND whether it's heavy or light in 3 weighings.",
+ hint:"Split into THREE groups, not two — comparing two always tells you about the third.",
+ sol:"Weigh {1,2,3,4} vs {5,6,7,8}. If balanced, the odd ball is in {9,10,11,12} — resolve in 2 more weighings against known-good balls. If unbalanced, you know the suspect set and a direction bias; a carefully chosen second weighing that swaps some balls across pans isolates it, and the third confirms heavy/light. Three-way splitting gives each weighing a 3× information yield, so up to (3ⁿ−3)/2 balls are solvable in n weighings.",
+ ans:"Yes — split into thirds each time. 3 weighings suffice (works up to 12).",
+ quiz:{stem:"Max balls resolvable (heavy-or-light unknown) in 3 weighings?",options:["8","9","12","27"],correct:2}},
+
+{id:"trailing",module:0,topic:"Series Summation",title:"Trailing zeros of 100!",
+ q:"How many trailing zeros does 100! (100 factorial) have?",
+ hint:"A trailing zero = a factor of 10 = a pair of 2 and 5. Which is scarcer?",
+ sol:"Factors of 5 are the bottleneck. Multiples of 5 up to 100: twenty of them. Of those, four (25,50,75,100) contribute a second 5. Total exponent of 5 = 20 + 4 = 24. So 24 trailing zeros.",
+ ans:"24. (⌊100/5⌋ + ⌊100/25⌋ = 20 + 4.)",
+ quiz:{stem:"Number of trailing zeros in 100! :",options:["20","24","10","25"],correct:1}},
+
+{id:"horses",module:0,topic:"Logic Reasoning",title:"25 horses, 5 lanes",
+ q:"25 horses, each a distinct constant speed. A race holds at most 5 horses and only shows finishing order (no times). Minimum races to find the top 3?",
+ hint:"5 races to rank within groups, 1 to race the group winners — then prune.",
+ sol:"Race the 25 in 5 groups of 5 (5 races). Race the 5 winners (race 6): this ranks the group leaders; the winner is overall #1. Only horses that could still be top-3 remain: from the fastest group, its #2 and #3; from the 2nd group, its top-2; from the 3rd group, its #1. That's exactly 5 contenders for spots 2 and 3 → one final race (race 7).",
+ ans:"7 races.",
+ quiz:{stem:"Minimum races to find the fastest 3 of 25 horses (5 per race)?",options:["6","7","10","8"],correct:1}},
+
+{id:"infseq",module:0,topic:"Thinking Out of the Box",title:"Infinite power tower",
+ q:"If x^(x^(x^(...))) = 2 (an infinite tower), what is x?",
+ hint:"The whole tower equals 2, and so does the tower starting one level down.",
+ sol:"The exponent is itself the same infinite tower = 2. So the equation collapses to x² = 2, giving x = √2.",
+ ans:"√2.",
+ quiz:{stem:"Infinite tower x^x^x^… = 2 ⇒ x =",options:["2","√2","ln 2","1.5"],correct:1}},
+
+{id:"lastball",module:0,topic:"Application of Symmetry",title:"Last ball in the bag",
+ q:"A bag has 20 blue and 14 red balls. Repeatedly draw 2: if same color, add a blue; if different, add a red (unlimited spares). What color is the final ball?",
+ hint:"Track the parity of the RED count through each move.",
+ sol:"Two blue → −1 blue (red unchanged). Two red → +1 blue, −2 red. One of each → −1 blue (red unchanged). Red only ever changes by 0 or −2, so red's parity is invariant. Starting with 14 (even) reds, red stays even and can hit 0 → the last ball is blue. (With 13 reds it stays odd → last ball is red.)",
+ ans:"Blue. Red parity is invariant; 14 is even ⇒ blue. (13 red ⇒ red.)",
+ quiz:{stem:"Bag with 20 blue, 14 red under these rules — last ball is:",options:["Blue","Red","50/50","Depends on draws"],correct:0}},
+
+{id:"switches",module:0,topic:"Logic Reasoning",title:"Four light switches",
+ q:"One bulb, four switches outside the room. You may toggle any switches any number of times, then enter ONCE to determine which switch controls the bulb. How?",
+ hint:"On/off is one bit. A bulb also gets warm — that's a second bit. 2×2 = 4.",
+ sol:"Use two binary signals: state (on/off) and heat (warm/cold). Turn on 1&2 for a while; turn off 2, turn on 3; enter. On+hot⇒1, off+hot⇒2, on+cold⇒3, off+cold⇒4.",
+ ans:"Combine on/off with warm/cold — 2×2 = 4 distinguishable states.",
+ quiz:{stem:"Why can one visit identify 4 switches (not just 2)?",options:["Guessing","On/off + hot/cold = 2 bits","The bulb flickers","It can't"],correct:1}},
+
+{id:"coinpiles",module:0,topic:"Application of Symmetry",title:"Coin piles, blindfolded",
+ q:"Blindfolded, you're told 1000 coins are on the floor with exactly 20 heads up. You can't feel which side is up, but you can flip coins. Split them into two piles with equal numbers of heads.",
+ hint:"You can't select heads — but you can force symmetry by flipping.",
+ sol:"Move any 20 coins into a new pile and flip all 20. If that pile originally held m heads, it had 20−m tails; flipping makes it 20−m heads. The other pile keeps 20−m heads. Equal — no matter which coins you grabbed.",
+ ans:"Take any 20 coins, flip them all. Both piles then hold 20−m heads.",
+ quiz:{stem:"To equalize heads: pull aside 20 coins and…",options:["Count them","Flip all 20","Leave them","Flip 10"],correct:1}},
+
+{id:"chameleon",module:0,topic:"Modular Arithmetic",title:"Chameleon colors",
+ q:"An island has 13 red, 15 green, 17 blue chameleons. When two of different colors meet, both become the third color. Can they all become one color?",
+ hint:"Look at the three counts modulo 3.",
+ sol:"A meeting changes counts by (−1,−1,+2) in some order, so the pairwise differences shift only by 0 or ±3 — the residues mod 3 of the counts are frozen. Start: 13,15,17 ≡ 1,0,2 (mod 3), all different. To be monochrome you'd need two colors at 0 simultaneously (equal residues), which can never happen. Impossible.",
+ ans:"No. Counts mod 3 are 1,0,2 (all distinct) and stay distinct.",
+ quiz:{stem:"Can 13/15/17 chameleons all become one color?",options:["Yes","No — invariant mod 3","Only if red starts","Yes, in 15 steps"],correct:1}},
+
+{id:"ants-square",module:0,topic:"Pigeon Hole Principle",title:"51 ants on a square",
+ q:"51 ants sit on a unit square. Show a glass of radius 1/7 can always be placed to cover at least 3 ants.",
+ hint:"Chop the square into fewer than 51/2 regions — pigeonhole.",
+ sol:"Partition the unit square into 25 sub-squares of side 1/5. With 51 ants and 25 cells, some cell holds ≥3 (since 51 > 2·25). A circle of radius 1/7 covers a 1/5-square because its diameter 2/7 ≈ 0.286 exceeds the square's diagonal √2/5 ≈ 0.283.",
+ ans:"Yes. 5×5 grid ⇒ some cell has ≥3 ants; a 1/7-radius disk covers a 1/5-cell.",
+ quiz:{stem:"51 ants, unit square — a disk of radius 1/7 covers at least:",options:["2 ants","3 ants","1 ant","4 ants"],correct:1}},
+
+{id:"coinsplit",module:0,topic:"Math Induction",title:"Coin-split product sum",
+ q:"Split 1000 coins into two piles of sizes x and y (=1000−x); record xy. Recurse on each pile, summing all products until every pile is size 1. What's the total, and does the split order matter?",
+ hint:"Try n=2,3,4 to guess the closed form, then prove by induction.",
+ sol:"Let f(n) be the total for n coins. f(2)=1, f(3)=3, f(4)=6 → guess f(n)=n(n−1)/2. Induction: f(N)=x(N−x)+f(x)+f(N−x)=x(N−x)+x(x−1)/2+(N−x)(N−x−1)/2 = N(N−1)/2. Independent of how you split. For 1000: 1000·999/2 = 499500.",
+ ans:"Always n(n−1)/2 = 499500. Order-independent.",
+ quiz:{stem:"Coin-split product sum for 1000 coins:",options:["1000·999","499500","1000²/2","500500"],correct:1}},
+
+{id:"chocolate",module:0,topic:"Math Induction",title:"Chocolate bar breaks",
+ q:"A 6×8 chocolate bar. Each break splits one rectangle into two along a gridline. Minimum breaks to reduce it to all 48 unit squares?",
+ hint:"How does the piece count change with each break?",
+ sol:"Every break turns one piece into two, so the piece count rises by exactly 1 per break. Starting at 1 piece and ending at mn=48, you need 48−1 = 47 breaks — regardless of order.",
+ ans:"47 (mn − 1). Order doesn't matter.",
+ quiz:{stem:"Breaks to reduce a 6×8 bar to unit squares:",options:["48","47","24","13"],correct:1}},
+
+/* ---------------- PROBABILITY ---------------- */
+{id:"cointoss-more",module:1,topic:"Symmetry",title:"One extra coin",
+ q:"Gambler A flips n+1 fair coins; B flips n. Probability A gets strictly more heads than B?",
+ hint:"Remove A's last coin and compare A's first n vs B's n by symmetry.",
+ sol:"Compare A's first n coins with B's n. By symmetry P(A>B)=P(A<B)=x and P(=)=y with 2x+y=1. A's extra coin then breaks ties toward A exactly half the time: P(A total > B)=x+0.5y = x+0.5(1−2x)=0.5.",
+ ans:"Exactly 1/2.",
+ quiz:{stem:"P(A's n+1 coins beat B's n in heads):",options:["1/2","(n+1)/(2n+1)","n/(n+1)","varies"],correct:0}},
+
+{id:"cardgame-hi",module:1,topic:"Symmetry",title:"Higher card wins",
+ q:"From a 52-card deck you draw one, dealer draws another (no replacement). You win only if strictly higher (ties → dealer). Probability you win?",
+ hint:"By symmetry P(you higher)=P(dealer higher). Just find P(tie).",
+ sol:"By symmetry the two 'someone is higher' events are equal. Given your card, 3 of the remaining 51 share its value → P(tie)=3/51. So P(win)=(1−3/51)/2 = (48/51)/2 = 8/17.",
+ ans:"8/17.",
+ quiz:{stem:"P(your card strictly beats dealer's), ties to dealer:",options:["1/2","8/17","24/51","4/13"],correct:1}},
+
+{id:"drunk",module:1,topic:"Conditioning",title:"Drunk passenger",
+ q:"100 passengers board in order; each has an assigned seat. Passenger 1 is drunk and sits randomly. Everyone else takes their own seat if free, else a random free one. Probability passenger 100 gets their own seat?",
+ hint:"At every 'reset', the displaced passenger picks seat #1 or seat #100 with equal chance.",
+ sol:"The outcome is decided the first time someone takes seat 1 (you win) or seat 100 (you lose). By symmetry those are equally likely at each branch, so P = 1/2.",
+ ans:"1/2.",
+ quiz:{stem:"P(passenger 100 gets their own seat):",options:["1/100","1/2","99/100","1/50"],correct:1}},
+
+{id:"semicircle",module:1,topic:"Symmetry",title:"N points in a semicircle",
+ q:"N points are placed independently and uniformly on a circle. Probability all N lie within some common semicircle?",
+ hint:"Fix one point as the 'clockwise start' of the semicircle; these events are mutually exclusive.",
+ sol:"For each point, the event 'this point starts a clockwise semicircle containing all others' has probability (1/2)^(N−1), and these N events are mutually exclusive. Sum: N·(1/2)^(N−1) = N/2^(N−1).",
+ ans:"N / 2^(N−1).",
+ quiz:{stem:"P(all N random points fit in a semicircle):",options:["1/2^N","N/2^(N-1)","1/N","N/2^N"],correct:1}},
+
+{id:"chess",module:1,topic:"Combinatorics",title:"Seeds 1 & 2 in the final",
+ q:"A knockout tournament of 2ⁿ players; better player always wins; brackets random. Probability the two best players meet in the final?",
+ hint:"They meet in the final iff they're in different halves of the bracket.",
+ sol:"Both reach the final iff they start in different halves. Player 1 fixed, player 2 lands in a slot: 2^(n−1) of the remaining 2^n−1 slots are in the opposite half. P = 2^(n−1)/(2^n−1).",
+ ans:"2^(n−1) / (2^n − 1).",
+ quiz:{stem:"P(top 2 seeds meet in the final of a 2ⁿ bracket):",options:["1/2","2^(n-1)/(2^n-1)","1/2^n","1/(2^n-1)"],correct:1}},
+
+{id:"letters",module:1,topic:"Inclusion-Exclusion",title:"All letters misdelivered",
+ q:"Five personalized cover letters are stuffed at random into five addressed envelopes. Probability that ALL five go to the wrong firm?",
+ hint:"Derangements — inclusion-exclusion on 'at least one correct'.",
+ sol:"P(all wrong) = Σ (−1)^k/k! for k=0..5 = 1 − 1 + 1/2 − 1/6 + 1/24 − 1/120 = 11/30 ≈ 0.367. (Approaches 1/e for large n.)",
+ ans:"11/30 ≈ 0.367 (→ 1/e).",
+ quiz:{stem:"P(all 5 letters in the wrong envelopes):",options:["1/120","11/30","1/2","44/120"],correct:1}},
+
+{id:"birthday23",module:1,topic:"Combinatorics",title:"Birthday paradox",
+ q:"How many people are needed so the probability that two share a birthday exceeds 1/2? (365-day year.)",
+ hint:"Compute P(all distinct) = 365·364·…/(365^n) and find where it drops below 1/2.",
+ sol:"P(all distinct) = 365!/((365−n)!·365ⁿ). This first falls below 1/2 at n = 23. Surprisingly small.",
+ ans:"23 people.",
+ quiz:{stem:"People needed for >50% shared-birthday chance:",options:["183","23","57","30"],correct:1}},
+
+{id:"boysgirls",module:1,topic:"Conditional Probability",title:"Boys and girls",
+ q:"Part A: A two-child mother is at a dinner for mothers with ≥1 son. P(both boys)? Part B: You see a two-child colleague walking with one child, a boy. P(both boys)?",
+ hint:"A conditions on 'at least one boy'; B conditions on a specific observed child.",
+ sol:"A: sample space {BB,BG,GB,GG}; condition on ≥1 boy ⇒ {BB,BG,GB} ⇒ P(BB)=1/3. B: the observed child being a boy is independent of the other child ⇒ the other is 50/50 ⇒ P(BB)=1/2. The subtle difference is what you conditioned on.",
+ ans:"A: 1/3.  B: 1/2.",
+ quiz:{stem:"'Mother of 2 with at least one son' — P(both boys):",options:["1/2","1/3","1/4","2/3"],correct:1}},
+
+{id:"allgirl",module:1,topic:"Independence",title:"All-girl world",
+ q:"Every couple keeps having children until they get a girl, then stops. Each birth is 50/50 and independent. What's the long-run fraction of girls in the population?",
+ hint:"Ignore 'preference' language — each birth is still 50/50, independent of history.",
+ sol:"Stopping rules can't bias independent fair coins. Every birth is a girl with probability 1/2 regardless of the family's plan, so the population stays 50% girls.",
+ ans:"50%.",
+ quiz:{stem:"Fraction of girls under the 'stop at first girl' rule:",options:["Over 50%","Exactly 50%","Under 50%","Depends on family size"],correct:1}},
+
+{id:"unfaircoin",module:1,topic:"Bayes",title:"Two-headed coin",
+ q:"1000 coins: one is double-headed, 999 are fair. You pick one, flip 10 times, all heads. P(you picked the unfair coin)?",
+ hint:"Bayes: P(unfair)·1 vs P(fair)·(1/2)¹⁰.",
+ sol:"P = (1/1000·1)/(1/1000·1 + 999/1000·(1/2)¹⁰) = (1/1000)/(1/1000 + 999/1024000) ≈ 0.506.",
+ ans:"≈ 0.506 (about 50/50 despite 10 heads).",
+ quiz:{stem:"After 10 straight heads, P(coin is the double-header):",options:["~0.99","~0.506","~0.1","1.0"],correct:1}},
+
+{id:"vonneumann",module:1,topic:"Independence",title:"Fair odds from a biased coin",
+ q:"You have a coin biased with unknown P(head)=p. Generate a perfectly fair 50/50 outcome.",
+ hint:"Flip in pairs; two ordered outcomes have equal probability.",
+ sol:"Flip twice. HT and TH each occur with probability p(1−p) — equal. Map HT→win, TH→lose, and re-flip on HH or TT. This von Neumann trick gives exactly even odds.",
+ ans:"Flip pairs; HT=win, TH=lose, ignore HH/TT (P(HT)=P(TH)=p(1−p)).",
+ quiz:{stem:"Von Neumann's fair-coin-from-biased trick uses:",options:["Single flips","HT vs TH in pairs","Counting heads","Three flips"],correct:1}},
+
+{id:"amoeba",module:1,topic:"Conditioning",title:"Amoeba extinction",
+ q:"One amoeba, each minute independently: dies, stays, splits into 2, or splits into 3 — each with probability 1/4. Probability the lineage dies out?",
+ hint:"Let P be extinction prob; condition on the first minute's four outcomes.",
+ sol:"P = 1/4·1 + 1/4·P + 1/4·P² + 1/4·P³ (each descendant lineage independently dies with prob P). Solve P³+P²−3P+1=0 with 0<P<1 → P = √2 − 1 ≈ 0.414.",
+ ans:"√2 − 1 ≈ 0.414.",
+ quiz:{stem:"Amoeba (die/stay/split-2/split-3, ¼ each) extinction prob:",options:["1/4","√2 − 1","1/2","1"],correct:1}},
+
+{id:"gamblerruin",module:1,topic:"Conditional Probability",title:"Gambler's ruin (edge)",
+ q:"M has \\$1, N has \\$2; each game M wins \\$1 with prob 2/3, loses with 1/3, until someone is broke. P(M wins everything)?",
+ hint:"Set up the ruin recursion with p=2/3, total stake 3.",
+ sol:"With win-prob p=2/3, q=1/3, r=q/p=1/2. For a start of i out of N=3: Pᵢ = (1−rⁱ)/(1−r³). P₁ = (1−1/2)/(1−1/8) = (1/2)/(7/8) = 4/7.",
+ ans:"4/7.",
+ quiz:{stem:"M (\\$1, wins 2/3) vs N (\\$2) — P(M takes all):",options:["2/3","4/7","1/2","3/7"],correct:1}},
+
+{id:"noodles",module:1,topic:"Expected Value",title:"Connecting noodles",
+ q:"100 noodles in a bowl; blindfolded you tie two random loose ends together repeatedly until none are free. Expected number of loops formed?",
+ hint:"Build it up: E[f(n)] = E[f(n−1)] + 1/(2n−1).",
+ sol:"With n noodles (2n ends), the chance a chosen end ties to the same noodle (making a loop) is 1/(2n−1). So E[f(n)] = E[f(n−1)] + 1/(2n−1) = 1 + 1/3 + 1/5 + … + 1/199 ≈ 3.28.",
+ ans:"1 + 1/3 + 1/5 + … + 1/199 ≈ 3.28.",
+ quiz:{stem:"Expected loops from 100 noodles is the sum:",options:["1+1/2+…+1/100","1+1/3+1/5+…+1/199","100/2","harmonic to 1/100"],correct:1}},
+
+{id:"dicegame",module:1,topic:"Expected Value",title:"Reroll dice game",
+ q:"Roll a die: if 4,5,6 you may reroll; if 1,2,3 you must stop and take the current face value. Actually — you keep rolling while you get 4/5/6, taking the value only when you get 1/2/3. Expected payoff? (Zhou's version: reroll on 4-6.)",
+ hint:"Condition on the first roll via the law of total expectation.",
+ sol:"Let X be the payoff. On a 1/2/3 (prob 1/2) you keep the value, expected 2. On a 4/5/6 (prob 1/2) you take that value AND reroll, adding E[X]. So E[X] = 1/2·2 + 1/2·(5 + E[X]) ⇒ E[X] = 7.",
+ ans:"7.",
+ quiz:{stem:"Reroll-on-4/5/6 dice game expected payoff:",options:["3.5","7","5.25","6"],correct:1}},
+
+{id:"firstace",module:1,topic:"Order Statistics",title:"Cards to the first ace",
+ q:"In a shuffled 52-card deck, expected number of cards turned over to see the first ace?",
+ hint:"The 4 aces split the 48 non-aces into 5 gaps; use indicator symmetry.",
+ sol:"Each of the 48 non-aces is equally likely to fall in any of the 5 gaps created by the 4 aces, so each precedes all aces with prob 1/5. Expected non-aces before the first ace = 48/5. Add the ace itself: E = 1 + 48/5 = 10.6.",
+ ans:"10.6 = 1 + 48/5.",
+ quiz:{stem:"Expected cards flipped to reach the first ace:",options:["13","10.6","4","12.5"],correct:1}},
+
+/* ---------------- STOCHASTIC ---------------- */
+{id:"drunkbridge",module:2,topic:"Martingale",title:"Drunk man on a bridge",
+ q:"A drunk starts at meter 17 of a 100-meter bridge; each step ±1 with prob 1/2. P(reaches the far end, 100, before the start, 0)? Expected steps to hit an end?",
+ hint:"Sₙ and Sₙ²−n are martingales; use optional stopping at the two ends.",
+ sol:"Symmetric walk from 17 with barriers 0 and 100: P(hit 100 first)=17/100=0.17. Expected steps = a·b where distances are a=17 to start, b=83 to end ⇒ E[steps]=17·83=1411.",
+ ans:"P=0.17; expected steps = 17·83 = 1411.",
+ quiz:{stem:"Symmetric walk from 17, barriers 0 & 100 — P(hit 100 first):",options:["1/2","0.17","0.83","17/83"],correct:1}},
+
+{id:"exp-martingale",module:2,topic:"Brownian Motion",title:"Which are martingales?",
+ q:"For Brownian motion W(t): is (a) W(t), (b) W(t)²−t, (c) exp(λW(t) − ½λ²t) a martingale? And is √t·B_t a martingale?",
+ hint:"Check the drift term after applying Itô's lemma; a martingale has zero drift.",
+ sol:"W(t): yes. W(t)²−t: yes. exp(λW−½λ²t): yes (the exponential martingale). But Zₜ=√t·Bₜ has dZ = ½t^(−1/2)Bₜ dt + √t dBₜ — nonzero drift whenever Bₜ≠0, so NOT a martingale (though it's N(0,t²)-distributed). Likewise W(t)³ is not a martingale.",
+ ans:"W, W²−t, exp(λW−½λ²t): martingales. √t·B_t and W³: not.",
+ quiz:{stem:"Which is NOT a martingale?",options:["W(t)","W(t)²−t","exp(λW−½λ²t)","√t·B_t"],correct:3}},
+
+{id:"hhh",module:2,topic:"Markov Chain",title:"Expected tosses for HHH",
+ q:"Fair coin. Expected number of tosses to first see HHH in a row? And for THH?",
+ hint:"States = length of current run; set up absorption-time equations. Note THH has no self-overlap.",
+ sol:"For HHH: μ_S=1+½μ_S+½μ_H, μ_H=1+½μ_S+½μ_HH, μ_HH=1+½μ_S+½·0 ⇒ E=14. For THH: the pattern can't 'reset all the way', giving E=8. General rule: E[HHH]=2+4+8=14; overlapping patterns cost more.",
+ ans:"HHH: 14 tosses.  THH: 8 tosses.",
+ quiz:{stem:"Expected fair-coin tosses to first get HHH:",options:["8","14","6","16"],correct:1}},
+
+{id:"reflection",module:2,topic:"Brownian Motion",title:"First passage / reflection",
+ q:"For standard BM starting at 0, what's P(hits 3 before −5)? And the density of the first passage time to level x?",
+ hint:"Martingale stopped at a stopping time is a martingale ⇒ like a symmetric random walk on the two barriers.",
+ sol:"Driftless BM is a martingale, so it behaves like a symmetric walk on barriers: P(hit α before −β)=β/(α+β). Here P(hit 3 before −5)=5/8. The first-passage density to x uses the reflection principle: f(t)= x/(t√(2πt))·exp(−x²/2t).",
+ ans:"P(3 before −5) = 5/8; passage density x·e^(−x²/2t)/(t√(2πt)).",
+ quiz:{stem:"Driftless BM from 0 — P(hit 3 before −5):",options:["3/8","5/8","1/2","3/5"],correct:1}},
+
+/* ---------------- FINANCE ---------------- */
+{id:"putcall",module:3,topic:"Option Pricing",title:"Put-call parity",
+ q:"State put-call parity for European options on a non-dividend stock and give the intuition when K = forward price.",
+ hint:"Compare a call + cash Ke^(−rт) with a put + stock.",
+ sol:"c + K·e^(−rт) = p + S. Rearranged, c − p = S − K·e^(−rт) = PV of a forward with delivery K. So when K = S·e^(rт) (the forward price) the call and put have equal value; when K is below the forward, the call is worth more; above it, the put.",
+ ans:"c + Ke^(−rт) = p + S. At K = forward, call = put.",
+ quiz:{stem:"European put-call parity (non-dividend):",options:["c + K = p + S","c + Ke^(−rт) = p + S","c − p = K − S","c + S = p + Ke^(−rт)"],correct:1}},
+
+{id:"amcall",module:3,topic:"Option Pricing",title:"Never early-exercise an American call",
+ q:"Why is it never optimal to early-exercise an American call on a NON-dividend-paying stock?",
+ hint:"Exercising throws away time value; think about the parity decomposition or Jensen's inequality.",
+ sol:"An American call ≥ European call = (S−K) + (K−Ke^(−rт)) + p. The last two terms — interest saved on the strike and the embedded put protection — are strictly positive, so the call is worth strictly more alive than its intrinsic value S−K. Selling beats exercising. (Puts differ, because the put's floor is K, not Ke^(−rт).)",
+ ans:"Time value + interest on strike are positive ⇒ selling beats exercising.",
+ quiz:{stem:"Early-exercising an American call on a non-dividend stock is:",options:["Optimal when ITM","Never optimal","Optimal at expiry","Optimal if r>0"],correct:1}},
+
+{id:"delta-atm",module:3,topic:"The Greeks",title:"ATM call delta",
+ q:"Roughly what is the delta of an at-the-money call (no dividend), and where does it head as expiry nears?",
+ hint:"Δ = N(d₁); at S=K, d₁ = (r/σ + σ/2)√т > 0.",
+ sol:"Δ = N(d₁). At the money d₁ = (r/σ + σ/2)√т > 0, so Δ > 0.5, and larger for longer maturities. As т→0 the ATM delta → N(0) = 0.5 (delta becomes a step function through the strike).",
+ ans:"Slightly above 0.5; → 0.5 as expiry approaches.",
+ quiz:{stem:"Delta of an at-the-money call (no dividend) is:",options:["Exactly 0.5","Just above 0.5","0","1"],correct:1}},
+
+{id:"hedge-ratio",module:3,topic:"Portfolio",title:"Optimal hedge ratio",
+ q:"You hold 1 share of A and short h shares of B to minimize variance. Given σ_A, σ_B, correlation ρ, what is h?",
+ hint:"Minimize Var(r_A − h·r_B) over h.",
+ sol:"Var = σ_A² − 2hρσ_Aσ_B + h²σ_B². Set derivative to 0: −2ρσ_Aσ_B + 2hσ_B² = 0 ⇒ h = ρ·σ_A/σ_B. Second derivative 2σ_B² > 0 confirms a minimum.",
+ ans:"h = ρ·σ_A / σ_B.",
+ quiz:{stem:"Variance-minimizing hedge ratio h =",options:["σ_A/σ_B","ρσ_A/σ_B","ρσ_B/σ_A","ρ·σ_Aσ_B"],correct:1}}
+];
+
+/* Market connection for each problem, by id */
+const MARKET={
+  "pirates":"Backward induction from the final payoff is exactly how American options and sequential bargaining are priced \u2014 and how execution algos reason about the last child order first, then work back to the first.",
+  "tiger":"Rational-agent parity is predatory-trading logic: whether it's safe to lean on a big resting order depends on how many other rational players could punish you for it.",
+  "river":"Routing a large order through scarce liquidity to minimize total market-impact cost is the same shared-constraint scheduling \u2014 small clips ferry the block like the fast pair carries the torch.",
+  "birthday-boss":"Iterated 'I know that you don't know' is how markets infer private information from public quotes \u2014 each cancel or fill narrows what informed traders must be seeing.",
+  "ropes":"Building an exact 45-minute exposure from two crude ropes is replication: synthesizing a precise payoff from a handful of liquid but imprecise instruments.",
+  "ball12":"Each weighing is a costly 3-outcome experiment. Designing trades or A/B signal tests to extract maximum information per query is the same optimization under a data budget.",
+  "trailing":"The scarce factor (5s, not 2s) sets the count \u2014 like finding the binding risk driver in a book: the bottleneck exposure, not the abundant one, determines your tail.",
+  "horses":"Selecting the top strategies from many via limited, noisy head-to-head comparisons is exactly signal and strategy selection under a finite backtest budget.",
+  "infseq":"A quantity defined in terms of itself is a fixed-point solve \u2014 the same structure as backing out implied volatility or an equilibrium price that feeds back on itself.",
+  "lastball":"A conserved parity that fixes the final state mirrors a no-arbitrage invariant: a properly hedged book's terminal value is locked regardless of the path.",
+  "switches":"Encoding two signals (on/off + hot/cold) into one observation is factor extraction \u2014 pulling several risk factors out of a small set of observed prices.",
+  "coinpiles":"Forcing a guaranteed equal split by flipping, not selecting, is a market-neutral construction: build the pair so P&L is invariant to which way the market moves.",
+  "chameleon":"A conserved residue mod 3 makes some states unreachable \u2014 the combinatorial version of why certain payoffs simply cannot be replicated under no-arbitrage.",
+  "ants-square":"Pigeonhole guarantees clustering: with enough orders across a band of prices, some level must hold concentrated liquidity \u2014 the basis of risk bucketing.",
+  "coinsplit":"The total being independent of how you split is path-independence \u2014 a fully hedged book whose realized value doesn't depend on how you rebalanced along the way.",
+  "chocolate":"The number of breaks is fixed no matter the order \u2014 like the number of trades to fully unwind a position being an invariant of the book, not the route.",
+  "cointoss-more":"A symmetry argument that isolates a tiny edge is how you value a small informational or fee advantage layered on top of a 50/50 market.",
+  "cardgame-hi":"Ties going to the house is literally the bid-ask spread: a near-symmetric game where the small asymmetry is the market-maker's edge.",
+  "drunk":"A messy sequence of dependent choices collapsing to 50/50 models how one informed disruptor's impact on an order queue resolves to a clean fill probability.",
+  "semicircle":"Probability that all points fit in a semicircle is joint-tail / scenario analysis \u2014 the chance every asset return lands inside one adverse range at once.",
+  "chess":"Probability two players meet is collision / counterparty probability \u2014 the chance two orders cross in a matching engine, or two names collide in netting.",
+  "letters":"Complete mismatch (a derangement) is operational risk: the chance every ticket is mis-assigned in settlement, and the matching failures that cause it.",
+  "birthday23":"Collision probability being surprisingly high is crowding risk \u2014 how likely two funds independently put on the same trade, or two strategies share signals.",
+  "boysgirls":"What you condition on changes the answer \u2014 the exact trap behind survivorship and selection bias when you read a conditional backtest result.",
+  "allgirl":"A stopping rule can't bias a fair process \u2014 the intuition behind optional stopping: you can't manufacture edge purely from when you choose to exit.",
+  "unfaircoin":"Bayesian updating after a win streak is how you judge whether a strategy is truly profitable or just lucky \u2014 a weak prior needs a lot of evidence to move.",
+  "vonneumann":"Extracting an unbiased 50/50 from a biased coin is debiasing a data feed, or generating fair randomization for order placement.",
+  "amoeba":"Branching-process extinction probability is survival analysis for funds and default cascades \u2014 whether a drawdown lineage dies out or recovers.",
+  "gamblerruin":"Gambler's ruin with an edge is risk-of-ruin and position sizing: the chance of hitting a drawdown limit before your target \u2014 the heart of Kelly.",
+  "noodles":"Expected loop count via linearity of expectation is how you estimate expected clusters or netting cycles across a web of linked positions.",
+  "dicegame":"The option to reroll is a continuation value: optimal stopping is exactly when to close a trade or exercise a real option to keep going.",
+  "firstace":"Expected cards to the first ace is expected waiting time \u2014 time to the first fill, the first informed trade, or the first jump in a price process.",
+  "drunkbridge":"A symmetric walk between two barriers is the probability price hits your stop-loss before your take-profit \u2014 first-passage in a live trade.",
+  "exp-martingale":"Spotting a martingale is risk-neutral pricing: a tradable discounted price must be driftless under Q, so a nonzero drift is an arbitrage flag.",
+  "hhh":"Expected tosses to a pattern is expected time to a signal sequence or regime trigger firing in a live strategy.",
+  "reflection":"First-passage via the reflection principle is barrier-option pricing and stop-out probability \u2014 the chance a path touches a level before maturity.",
+  "putcall":"This one IS a trade: violations of put-call parity are harvested by conversion and reversal arbitrage on the options desk.",
+  "amcall":"Why market-makers sell rather than early-exercise a call \u2014 and why an upcoming dividend is the one case that can flip the decision.",
+  "delta-atm":"Delta of an ATM call is your hedge ratio: shares to short per option, and why gamma makes that hedge brutal to maintain near expiry.",
+  "hedge-ratio":"The minimum-variance hedge ratio is beta / cross-hedging \u2014 how much of a liquid proxy to short to neutralize a position you can't hedge directly.",
+};
+
+/* ============================================================
+   STORAGE  (persistent via artifact window.storage; falls back
+   to in-memory if unavailable)
+   ============================================================ */
+const KEY="quantprep:v1";
+let STATE={
+  mastered:{},          // id -> true
+  box:{},               // id -> Leitner box 1..5
+  quizHistory:[],       // {date, module, pct, n}
+  lastStudy:null,       // ISO date string
+  streak:0
+};
+/* ---- portable key/value store: artifact runtime -> localStorage -> memory ---- */
+const hasArtifactStore = !!(window.storage && window.storage.get);
+let hasLocal=false; try{const k="__qp_test";localStorage.setItem(k,"1");localStorage.removeItem(k);hasLocal=true;}catch(e){hasLocal=false;}
+const MEM={};
+async function getKV(key){
+  if(hasArtifactStore){ try{const r=await window.storage.get(key); return r&&r.value;}catch(e){return null;} }
+  if(hasLocal){ try{return localStorage.getItem(key);}catch(e){return null;} }
+  return MEM[key]||null;
+}
+async function setKV(key,val){
+  if(hasArtifactStore){ try{await window.storage.set(key,val,false);}catch(e){} return; }
+  if(hasLocal){ try{localStorage.setItem(key,val);}catch(e){} return; }
+  MEM[key]=val;
+}
+
+async function loadState(){
+  const v=await getKV(KEY);
+  if(v){ try{STATE=Object.assign(STATE,JSON.parse(v));}catch(e){} }
+  P.forEach(p=>{ if(!STATE.box[p.id]) STATE.box[p.id]=1; });
+  updateStreak();
+}
+async function saveState(){ await setKV(KEY, JSON.stringify(STATE)); }
+
+/* ============================================================
+   AI ADAPTER  - one entry point for every AI feature.
+   Default "artifact": Claude via the Anthropic runtime (no key)
+   when this file runs inside a Claude Artifact.
+   Self-hosters pick a provider + key in Settings:
+     - openai-compatible  (DeepSeek, OpenAI, Groq, OpenRouter, Ollama...)
+     - anthropic          (Anthropic API key, direct from browser)
+   Keys live only in this browser (localStorage); they are sent
+   solely to the endpoint you configure.
+   ============================================================ */
+const AI_KEY="quantprep:ai:v1";
+let AI={provider:"artifact", baseUrl:"", apiKey:"", model:""};
+async function loadAI(){ const v=await getKV(AI_KEY); if(v){ try{AI=Object.assign(AI,JSON.parse(v));}catch(e){} } }
+async function saveAI(){ await setKV(AI_KEY, JSON.stringify(AI)); }
+
+async function askAI(opts){
+  const system=opts.system, messages=opts.messages;
+  const p=AI.provider||"artifact";
+
+  if(p==="artifact"){
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:system,messages:messages})
+    });
+    if(!r.ok) throw new Error("Artifact runtime HTTP "+r.status);
+    const d=await r.json();
+    return (d.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n").trim();
+  }
+
+  if(p==="anthropic"){
+    if(!AI.apiKey) throw new Error("No Anthropic API key set (Settings)");
+    const base=(AI.baseUrl||"https://api.anthropic.com").replace(/\/$/,"");
+    const r=await fetch(base+"/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":AI.apiKey,
+               "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:AI.model||"claude-3-5-sonnet-latest",max_tokens:1000,system:system,messages:messages})
+    });
+    if(!r.ok) throw new Error("Anthropic HTTP "+r.status);
+    const d=await r.json();
+    return (d.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n").trim();
+  }
+
+  // openai-compatible chat/completions (DeepSeek, OpenAI, Groq, OpenRouter, Ollama, ...)
+  if(!AI.baseUrl) throw new Error("No API base URL set (Settings)");
+  const msgs=[]; if(system) msgs.push({role:"system",content:system});
+  messages.forEach(function(m){ msgs.push(m); });
+  const r=await fetch(AI.baseUrl.replace(/\/$/,"")+"/chat/completions",{
+    method:"POST",
+    headers:Object.assign({"Content-Type":"application/json"}, AI.apiKey?{"Authorization":"Bearer "+AI.apiKey}:{}),
+    body:JSON.stringify({model:AI.model||"deepseek-chat",messages:msgs,max_tokens:1000})
+  });
+  if(!r.ok) throw new Error("Provider HTTP "+r.status);
+  const d=await r.json();
+  return ((d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||"").trim();
+}
+function aiHelpNote(){
+  return AI.provider==="artifact"
+    ? "If you're running this outside Claude, open Settings (top bar) to add an API key."
+    : "Check your provider, model, and API key in Settings.";
+}
+function updateStreak(){
+  const today = new Date().toISOString().slice(0,10);
+  if(STATE.lastStudy !== today){
+    const yest = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if(STATE.lastStudy === yest) STATE.streak = (STATE.streak||0)+1;
+    else STATE.streak = 1;
+    STATE.lastStudy = today;
+  } else if(!STATE.streak){ STATE.streak=1; }
+}
+
+/* ============================================================
+   UI helpers
+   ============================================================ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1600);}
+function modOf(k){return MODULES.find(m=>m.key===k);}
+function esc(s){return s;} // content is trusted authored HTML
+
+/* ---------- tab switching ---------- */
+function showView(v){
+  $$(".view").forEach(el=>el.classList.remove("active"));
+  $("#view-"+v).classList.add("active");
+  $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.view===v));
+  if(v==="dash") renderDash();
+  if(v==="learn") renderLearn();
+  if(v==="cards") renderCard();
+  if(v==="quiz") renderQuizHome();
+  window.scrollTo({top:0,behavior:"instant"});
+}
+$$("nav.tabs button").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function moduleStats(k){
+  const items=P.filter(p=>p.module===k);
+  const done=items.filter(p=>STATE.mastered[p.id]).length;
+  return {done,total:items.length,pct: items.length?Math.round(done/items.length*100):0};
+}
+function renderDash(){
+  $("#streakBox").textContent = `🔥 ${STATE.streak||0}-day streak`;
+  const totalDone=Object.keys(STATE.mastered).filter(id=>STATE.mastered[id]).length;
+  // ticker
+  const tk=$("#ticker");
+  tk.innerHTML = MODULES.map(m=>{const s=moduleStats(m.key);
+    return `<span class="chip">${m.name.split(" ")[0]} <b>${s.done}/${s.total}</b></span>`;}).join("")
+    + `<span class="chip">Total mastered <b>${totalDone}/${P.length}</b></span>`
+    + `<span class="chip">Quizzes taken <b>${STATE.quizHistory.length}</b></span>`;
+  // module cards
+  $("#moduleCards").innerHTML = MODULES.map(m=>{const s=moduleStats(m.key);
+    return `<div class="card">
+      <span class="tag ${m.tag}">Module ${m.key+1}</span>
+      <h3 style="margin-top:10px">${m.name}</h3>
+      <div style="color:var(--ink-dim);font-size:13px;min-height:38px">${m.blurb}</div>
+      <div class="big" style="margin-top:8px">${s.pct}<span style="font-size:16px;color:var(--ink-faint)">%</span></div>
+      <div class="lbl">${s.done} of ${s.total} mastered</div>
+      <div class="bar"><i style="width:${s.pct}%"></i></div>
+    </div>`;}).join("");
+  // history
+  const h=$("#histCard");
+  if(!STATE.quizHistory.length){h.innerHTML='<div class="empty">No quizzes yet. Head to the Quiz tab and set a baseline.</div>';}
+  else{
+    h.innerHTML = STATE.quizHistory.slice(-8).reverse().map(q=>
+      `<div class="hist-row"><span>${q.date} · ${q.label}</span><span><b>${q.pct}%</b> &nbsp;(${q.correct}/${q.n})</span></div>`).join("");
+  }
+}
+$("#resetBtn").addEventListener("click",async()=>{
+  if(!confirm("Reset all mastery, flashcard boxes, quiz history and streak?"))return;
+  STATE={mastered:{},box:{},quizHistory:[],lastStudy:null,streak:0};
+  P.forEach(p=>STATE.box[p.id]=1);
+  updateStreak(); await saveState(); renderDash(); toast("Progress reset");
+});
+
+/* ============================================================
+   LEARN
+   ============================================================ */
+let learnFilterKey="all";
+function renderLearnFilter(){
+  const f=$("#learnFilter");
+  const btns=[["all","All"]].concat(MODULES.map(m=>[String(m.key),m.name]));
+  f.innerHTML=btns.map(([k,label])=>`<button data-k="${k}" data-on="${learnFilterKey===k?1:0}">${label}</button>`).join("");
+  $$("#learnFilter button").forEach(b=>b.addEventListener("click",()=>{learnFilterKey=b.dataset.k;renderLearn();}));
+}
+function renderLearn(){
+  renderLearnFilter();
+  const list=$("#probList");
+  const items=P.filter(p=>learnFilterKey==="all"||p.module===Number(learnFilterKey));
+  if(!items.length){list.innerHTML='<div class="empty">Nothing here.</div>';return;}
+  list.innerHTML=items.map(p=>{
+    const m=modOf(p.module);const done=!!STATE.mastered[p.id];
+    return `<div class="prob" data-id="${p.id}">
+      <div class="phead">
+        <span class="dot ${done?'done':''}" title="${done?'Mastered':'Not yet'}"></span>
+        <span class="tag ${m.tag}">${m.name.split(" ")[0]}</span>
+        <span class="ptitle">${p.title}</span>
+        <span class="ptopic">${p.topic}</span>
+      </div>
+      <div class="body">
+        <div class="q">${p.q}</div>
+        <div class="reveal-box hintbox" hidden><div class="rh">Hint</div><div>${p.hint}</div></div>
+        <div class="reveal-box sol solbox" hidden><div class="rh">Solution</div><div>${p.sol}</div><div class="ans" style="margin-top:10px">${p.ans}</div></div>
+        <div class="reveal-box mkt mktbox" ${done?'':'hidden'}><div class="rh">Where this shows up in markets</div><div>${MARKET[p.id]||"—"}</div></div>
+        <div class="coach">
+          <div class="rh"><span class="live"></span>Coach — try it yourself</div>
+          <div class="coach-thread" id="thread-${p.id}"></div>
+          <div class="coach-input">
+            <textarea class="coach-ta" placeholder="Type your answer or reasoning — I'll tell you if you're on track and nudge you if not."></textarea>
+            <button class="btn primary act-check">Check</button>
+          </div>
+          <div class="coach-hint-note">Press <span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> to send · stuck? just say “give me a hint” or “I give up”.</div>
+        </div>
+        <div class="actions">
+          <button class="btn ghost act-hint">Show hint</button>
+          <button class="btn act-sol">Reveal solution</button>
+          <button class="btn act-mkt">${done?'Market connection ✓':'Market connection'}</button>
+          <button class="btn act-similar">→ Related problem</button>
+          <button class="btn primary act-master">${done?'✓ Mastered':'Mark mastered'}</button>
+        </div>
+      </div>
+    </div>`;}).join("");
+  $$(".prob").forEach(card=>{
+    const id=card.dataset.id;const p=P.find(x=>x.id===id);
+    card.querySelector(".phead").addEventListener("click",()=>card.classList.toggle("open"));
+    card.querySelector(".act-hint").addEventListener("click",e=>{e.stopPropagation();
+      const h=card.querySelector(".hintbox");h.hidden=!h.hidden;e.target.textContent=h.hidden?"Show hint":"Hide hint";});
+    card.querySelector(".act-sol").addEventListener("click",e=>{e.stopPropagation();
+      const s=card.querySelector(".solbox");s.hidden=!s.hidden;e.target.textContent=s.hidden?"Reveal solution":"Hide solution";});
+    card.querySelector(".act-mkt").addEventListener("click",e=>{e.stopPropagation();
+      const b=card.querySelector(".mktbox");b.hidden=!b.hidden;});
+    card.querySelector(".act-master").addEventListener("click",async e=>{e.stopPropagation();
+      STATE.mastered[id]=!STATE.mastered[id];
+      if(STATE.mastered[id]) STATE.box[id]=Math.min(5,(STATE.box[id]||1)+1);
+      updateStreak();await saveState();
+      const done=STATE.mastered[id];
+      e.target.textContent=done?'✓ Mastered':'Mark mastered';
+      card.querySelector(".dot").classList.toggle("done",done);
+      if(done){card.querySelector(".mktbox").hidden=false;card.querySelector(".act-mkt").textContent="Market connection ✓";}
+      toast(done?"Nice — see how it maps to markets below":"Unmarked");
+    });
+    // ----- coach wiring -----
+    const ta=card.querySelector(".coach-ta");
+    const checkBtn=card.querySelector(".act-check");
+    checkBtn.addEventListener("click",e=>{e.stopPropagation();sendCoach(p,card);});
+    ta.addEventListener("click",e=>e.stopPropagation());
+    ta.addEventListener("keydown",e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();sendCoach(p,card);}
+    });
+    // restore any in-session thread
+    renderThread(p.id);
+    // ----- jump to a related green-book problem -----
+    const simBtn=card.querySelector(".act-similar");
+    simBtn.addEventListener("click",e=>{e.stopPropagation();findSimilar(p);});
+  });
+}
+
+/* ============================================================
+   COACH  (per-problem chat; uses the in-artifact Anthropic API)
+   ============================================================ */
+const COACH={};        // id -> [{role,content}]
+const COACH_BUSY={};   // id -> bool
+function mdlite(s){
+  s=s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  s=s.replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
+  s=s.replace(/`([^`]+)`/g,"<code>$1</code>");
+  return s;
+}
+function renderThread(id,thinking){
+  const box=document.getElementById("thread-"+id);
+  if(!box)return;
+  const turns=COACH[id]||[];
+  let html=turns.map(t=>{
+    if(t.role==="user")return `<div class="msg me">${mdlite(t.content)}</div>`;
+    if(t.role==="error")return `<div class="msg err">${mdlite(t.content)}</div>`;
+    return `<div class="msg coach-msg">${mdlite(t.content)}</div>`;
+  }).join("");
+  if(thinking) html+=`<div class="msg thinking">thinking</div>`;
+  box.innerHTML=html;
+  box.scrollTop=box.scrollHeight;
+}
+async function sendCoach(p,card){
+  const id=p.id;
+  if(COACH_BUSY[id])return;
+  const ta=card.querySelector(".coach-ta");
+  const val=(ta.value||"").trim();
+  if(!val){ta.focus();return;}
+  COACH[id]=COACH[id]||[];
+  COACH[id].push({role:"user",content:val});
+  ta.value="";
+  COACH_BUSY[id]=true;
+  card.querySelector(".act-check").disabled=true;
+  renderThread(id,true);
+
+  const system=`You are a sharp, warm quant-interview coach helping a candidate solve a brain teaser out loud. Coach them; do not lecture.
+
+PROBLEM: ${p.q}
+
+CANONICAL SOLUTION (your private reference — do NOT paste it verbatim unless the candidate has essentially solved it or clearly gives up): ${p.sol.replace(/<[^>]+>/g," ")}
+
+FINAL ANSWER: ${p.ans}
+
+How to respond:
+- Keep it to 2–4 sentences, conversational, plain text (you may use **bold** for a key term).
+- If their reasoning/answer is correct, confirm it clearly and crisply name the technique or insight that made it work.
+- If it's partially right, affirm the correct part and ask ONE pointed question or give the smallest hint that exposes the gap.
+- If it's wrong, don't reveal the answer — give the minimal nudge toward the right technique (simplification, symmetry, parity/invariant, induction, conditioning, pigeonhole...) and invite another attempt.
+- If they ask for a hint, give one escalating hint, not the whole thing. If they say they give up, then walk through the full solution simply.
+- Never be condescending. Be specific, not generic.`;
+
+  const messages=COACH[id].filter(t=>t.role!=="error").map(t=>({role:t.role,content:t.content}));
+
+  try{
+    let text=(await askAI({system,messages}))
+      || "(no response — try rephrasing your answer)";
+    COACH[id].push({role:"assistant",content:text});
+  }catch(err){
+    COACH[id].push({role:"error",content:"Couldn't reach the coach. "+aiHelpNote()+" Your answer is safe above; try again."});
+  }finally{
+    COACH_BUSY[id]=false;
+    const btn=card.querySelector(".act-check");if(btn)btn.disabled=false;
+    renderThread(id,false);
+  }
+}
+
+/* ============================================================
+   RELATED PROBLEM  (jump to another green-book problem, same technique)
+   ============================================================ */
+function findSimilar(p){
+  let pool=P.filter(x=>x.id!==p.id && x.topic===p.topic);
+  if(!pool.length) pool=P.filter(x=>x.id!==p.id && x.module===p.module);
+  if(!pool.length){toast("No related problem in the book yet");return;}
+  const fresh=pool.filter(x=>!STATE.mastered[x.id]);
+  const from=fresh.length?fresh:pool;
+  const chosen=from[Math.floor(Math.random()*from.length)];
+  const via=(chosen.topic===p.topic)?p.topic:modOf(chosen.module).name.split(" ")[0];
+  openProblem(chosen.id, via);
+}
+function openProblem(id, via){
+  const target=P.find(x=>x.id===id); if(!target) return;
+  if(!(learnFilterKey==="all"||Number(learnFilterKey)===target.module)){
+    learnFilterKey=String(target.module); renderLearn();
+  }
+  const el=document.querySelector('.prob[data-id="'+id+'"]');
+  if(!el) return;
+  el.classList.add("open");
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  setTimeout(()=>el.classList.remove("flash"),1500);
+  toast(via?("Same technique · "+via):"Related problem");
+}
+
+/* ============================================================
+   SETTINGS MODAL  (provider config)
+   ============================================================ */
+const PRESETS={
+  artifact:{provider:"artifact",baseUrl:"",model:""},
+  deepseek:{provider:"openai",baseUrl:"https://api.deepseek.com",model:"deepseek-chat"},
+  openai:{provider:"openai",baseUrl:"https://api.openai.com/v1",model:"gpt-4o-mini"},
+  groq:{provider:"openai",baseUrl:"https://api.groq.com/openai/v1",model:"llama-3.3-70b-versatile"},
+  openrouter:{provider:"openai",baseUrl:"https://openrouter.ai/api/v1",model:"deepseek/deepseek-chat"},
+  ollama:{provider:"openai",baseUrl:"http://localhost:11434/v1",model:"llama3.1"},
+  anthropic:{provider:"anthropic",baseUrl:"https://api.anthropic.com",model:"claude-3-5-sonnet-latest"},
+  custom:{provider:"openai",baseUrl:"",model:""}
+};
+const setBack=$("#setBack");
+function reflectAIBadge(){
+  const g=$("#gearBtn");
+  const label = AI.provider==="artifact" ? "Claude" : (AI.model||AI.provider);
+  g.innerHTML = "⚙ <span class='badge'>"+label+"</span>";
+}
+function openSettings(o){
+  setBack.classList.toggle("open",o);
+  if(o){
+    $("#setProvider").value=AI.provider||"artifact";
+    $("#setBase").value=AI.baseUrl||"";
+    $("#setModel").value=AI.model||"";
+    $("#setKeyInput").value=AI.apiKey||"";
+    $("#setPreset").value="";
+    setStatus("");
+    reflectProviderRows();
+  }
+}
+function setStatus(msg,cls){const el=$("#setStatus");el.textContent=msg||"";el.className=cls||"";}
+function reflectProviderRows(){
+  const p=$("#setProvider").value;
+  $("#rowBase").style.display = (p==="artifact")?"none":"block";
+  $("#rowModel").style.display= (p==="artifact")?"none":"block";
+  $("#rowKey").style.display  = (p==="artifact")?"none":"block";
+}
+$("#gearBtn").addEventListener("click",()=>openSettings(true));
+$("#setClose").addEventListener("click",()=>openSettings(false));
+setBack.addEventListener("click",e=>{if(e.target===setBack)openSettings(false);});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&setBack.classList.contains("open"))openSettings(false);});
+$("#setProvider").addEventListener("change",reflectProviderRows);
+$("#setPreset").addEventListener("change",e=>{
+  const pre=PRESETS[e.target.value]; if(!pre)return;
+  $("#setProvider").value=pre.provider;
+  $("#setBase").value=pre.baseUrl;
+  $("#setModel").value=pre.model;
+  reflectProviderRows();
+});
+$("#setKeyShow").addEventListener("click",()=>{
+  const inp=$("#setKeyInput");const show=inp.type==="password";
+  inp.type=show?"text":"password";$("#setKeyShow").textContent=show?"Hide":"Show";
+});
+function readForm(){
+  return {provider:$("#setProvider").value,
+          baseUrl:$("#setBase").value.trim(),
+          model:$("#setModel").value.trim(),
+          apiKey:$("#setKeyInput").value.trim()};
+}
+$("#setSave").addEventListener("click",async()=>{
+  AI=Object.assign(AI,readForm());await saveAI();reflectAIBadge();
+  setStatus("Saved ✓","ok");toast("AI provider saved");
+});
+$("#setArtifact").addEventListener("click",async()=>{
+  AI={provider:"artifact",baseUrl:"",model:"",apiKey:AI.apiKey||""};
+  await saveAI();reflectAIBadge();openSettings(true);setStatus("Using built-in Claude","ok");
+});
+$("#setTest").addEventListener("click",async()=>{
+  const saved={...AI}; AI=Object.assign({...AI},readForm());
+  setStatus("Testing…","busy");
+  try{
+    const t=await askAI({system:"Reply with exactly: OK",messages:[{role:"user",content:"ping"}]});
+    setStatus(t?("Connected ✓ — "+t.slice(0,40)):"Empty reply","ok");
+  }catch(err){
+    setStatus("Failed: "+err.message,"bad"); AI=saved; // revert unsaved test on failure
+  }
+});
+
+/* ============================================================
+   FLASHCARDS  (Leitner: box 1 shown most, box 5 least)
+   ============================================================ */
+let deck=[], deckPos=0;
+function buildDeck(){
+  // weight by inverse box: lower box => more likely / earlier
+  const weighted=[];
+  P.forEach(p=>{const b=STATE.box[p.id]||1; const reps=6-b; for(let i=0;i<reps;i++) weighted.push(p.id);});
+  // shuffle
+  for(let i=weighted.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[weighted[i],weighted[j]]=[weighted[j],weighted[i]];}
+  // unique order preserving first appearance
+  const seen=new Set();deck=[];
+  weighted.forEach(id=>{if(!seen.has(id)){seen.add(id);deck.push(id);}});
+  deckPos=0;
+}
+function renderCard(){
+  if(!deck.length) buildDeck();
+  const fc=$("#flashcard");fc.classList.remove("flipped");
+  if(deckPos>=deck.length){buildDeck();}
+  const p=P.find(x=>x.id===deck[deckPos]);
+  const m=modOf(p.module);
+  $("#fcTag").className="tag "+m.tag;$("#fcTag").textContent=m.name.split(" ")[0];
+  $("#fcTopic").textContent=p.topic;
+  $("#fcPrompt").textContent=p.title+" — "+ shortQ(p.q);
+  $("#fcAnswer").textContent=p.ans;
+  $("#fcNote").textContent="Hint: "+p.hint;
+  $("#fcBox").textContent="Box "+(STATE.box[p.id]||1)+"/5";
+  $("#fcProgress").textContent=`Card ${deckPos+1} of ${deck.length} in this round`;
+  // deck state pips
+  const counts=[0,0,0,0,0];P.forEach(x=>counts[(STATE.box[x.id]||1)-1]++);
+  $("#deckState").innerHTML="Boxes: "+counts.map((c,i)=>`<i class="${c?'fill':''}" title="Box ${i+1}: ${c} cards"></i>`).join("")+`&nbsp;(${P.length} cards)`;
+}
+function shortQ(q){return q.length>150?q.slice(0,147)+"…":q;}
+$("#flashcard").addEventListener("click",()=>$("#flashcard").classList.toggle("flipped"));
+$("#flashcard").addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();$("#flashcard").classList.toggle("flipped");}});
+async function gradeCard(got){
+  const id=deck[deckPos];
+  STATE.box[id]=got?Math.min(5,(STATE.box[id]||1)+1):1;
+  if(got&&STATE.box[id]>=4) STATE.mastered[id]=true;
+  updateStreak();await saveState();
+  deckPos++;renderCard();toast(got?"→ moved up a box":"← back to box 1");
+}
+$("#fcGot").addEventListener("click",()=>gradeCard(true));
+$("#fcMiss").addEventListener("click",()=>gradeCard(false));
+document.addEventListener("keydown",e=>{
+  if(!$("#view-cards").classList.contains("active"))return;
+  if(e.key==="ArrowRight")gradeCard(true);
+  if(e.key==="ArrowLeft")gradeCard(false);
+});
+
+/* ============================================================
+   QUIZ  (timed, scored, prioritizes weak/unmastered)
+   ============================================================ */
+let quiz=null, quizTimer=null;
+function renderQuizHome(){
+  const shell=$("#quizShell");
+  shell.innerHTML=`
+    <div class="qcard">
+      <div class="eyebrow">Set up a session</div>
+      <h3 style="margin:8px 0 4px">Choose your focus</h3>
+      <p style="color:var(--ink-dim);font-size:14px;margin:0 0 18px">10 questions, 25s each. Weak and unmastered problems are weighted heavier.</p>
+      <div class="filter" id="quizPick"></div>
+      <button class="btn primary" id="startQuiz" style="margin-top:14px">Start quiz</button>
+    </div>`;
+  let pick="all";
+  const qp=$("#quizPick");
+  const opts=[["all","Mixed (all modules)"]].concat(MODULES.map(m=>[String(m.key),m.name]));
+  qp.innerHTML=opts.map(([k,l])=>`<button data-k="${k}" data-on="${k==='all'?1:0}">${l}</button>`).join("");
+  $$("#quizPick button").forEach(b=>b.addEventListener("click",()=>{pick=b.dataset.k;$$("#quizPick button").forEach(x=>x.dataset.on=x.dataset.k===pick?1:0);}));
+  $("#startQuiz").addEventListener("click",()=>startQuiz(pick));
+}
+function startQuiz(pick){
+  let pool=P.filter(p=>pick==="all"||p.module===Number(pick));
+  // weight: unmastered & low box first
+  pool=pool.map(p=>({p,w:(STATE.mastered[p.id]?1:3)+(6-(STATE.box[p.id]||1))}));
+  const chosen=[];
+  const bag=[];pool.forEach(o=>{for(let i=0;i<o.w;i++)bag.push(o.p.id);});
+  const seen=new Set();
+  while(chosen.length<Math.min(10,pool.length)&&bag.length){
+    const id=bag[Math.floor(Math.random()*bag.length)];
+    if(!seen.has(id)){seen.add(id);chosen.push(P.find(x=>x.id===id));}
+    if(seen.size>=pool.length)break;
+  }
+  quiz={items:chosen,i:0,correct:0,answered:false,label: pick==="all"?"Mixed":modOf(Number(pick)).name.split(" ")[0]};
+  renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  clearInterval(quizTimer);
+  const shell=$("#quizShell");
+  if(quiz.i>=quiz.items.length){return finishQuiz();}
+  const p=quiz.items[quiz.i];const m=modOf(p.module);
+  const q=p.quiz;
+  quiz.answered=false;let tleft=25;
+  shell.innerHTML=`
+    <div class="quiz-hud">
+      <span>Q ${quiz.i+1}/${quiz.items.length} · <span style="color:var(--ink-faint)">${p.title}</span></span>
+      <span><span class="timer" id="qtimer">${tleft}s</span> &nbsp; <span class="score">Score ${quiz.correct}</span></span>
+    </div>
+    <div class="qcard">
+      <span class="tag ${m.tag}">${m.name.split(" ")[0]} · ${p.topic}</span>
+      <div class="qtext">${q.stem}</div>
+      <div class="opts" id="opts">
+        ${q.options.map((o,idx)=>`<button class="opt" data-idx="${idx}">${o}</button>`).join("")}
+      </div>
+      <div class="qexpl" id="qexpl"><b style="color:var(--mint)">Why:</b> ${p.ans}</div>
+      <div style="margin-top:16px;text-align:right"><button class="btn" id="nextQ" disabled>Next →</button></div>
+    </div>`;
+  quizTimer=setInterval(()=>{
+    tleft--;$("#qtimer").textContent=tleft+"s";
+    if(tleft<=0){clearInterval(quizTimer);if(!quiz.answered)lockAnswer(-1);}
+  },1000);
+  $$("#opts .opt").forEach(b=>b.addEventListener("click",()=>lockAnswer(Number(b.dataset.idx))));
+  $("#nextQ").addEventListener("click",()=>{quiz.i++;renderQuizQuestion();});
+}
+function lockAnswer(chosenIdx){
+  if(quiz.answered)return;quiz.answered=true;clearInterval(quizTimer);
+  const p=quiz.items[quiz.i];const correct=p.quiz.correct;
+  $$("#opts .opt").forEach(b=>{
+    const idx=Number(b.dataset.idx);b.disabled=true;
+    if(idx===correct)b.classList.add("correct");
+    else if(idx===chosenIdx)b.classList.add("wrong");
+  });
+  $("#qexpl").classList.add("show");$("#nextQ").disabled=false;
+  if(chosenIdx===correct){quiz.correct++;STATE.box[p.id]=Math.min(5,(STATE.box[p.id]||1)+1);if(STATE.box[p.id]>=4)STATE.mastered[p.id]=true;}
+  else{STATE.box[p.id]=1;}
+  saveState();
+}
+async function finishQuiz(){
+  clearInterval(quizTimer);
+  const n=quiz.items.length,pct=Math.round(quiz.correct/n*100);
+  STATE.quizHistory.push({date:new Date().toISOString().slice(0,10),label:quiz.label,correct:quiz.correct,n,pct});
+  updateStreak();await saveState();
+  const msg = pct>=80?"Sharp. That's interview-ready.":pct>=50?"Solid — drill the misses in Learn.":"Rough round — revisit the techniques and go again.";
+  $("#quizShell").innerHTML=`
+    <div class="qcard quiz-done">
+      <div class="eyebrow">${quiz.label} · session complete</div>
+      <div class="score-big">${pct}%</div>
+      <div style="color:var(--ink-dim);margin:8px 0 4px">${quiz.correct} of ${n} correct</div>
+      <p style="color:var(--ink-dim);max-width:380px;margin:12px auto 20px">${msg}</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn primary" id="againQ">New quiz</button>
+        <button class="btn" id="toLearn">Review in Learn</button>
+      </div>
+    </div>`;
+  $("#againQ").addEventListener("click",renderQuizHome);
+  $("#toLearn").addEventListener("click",()=>showView("learn"));
+}
+
+/* ============================================================
+   FLOATING TUTOR CHAT  (in-artifact Anthropic API)
+   ============================================================ */
+const CHAT=[];        // {role, content}
+let CHAT_BUSY=false;
+const fab=$("#fab"), panel=$("#chatpanel"), chatBody=$("#chatBody"), chatInput=$("#chatInput");
+function openChat(o){panel.classList.toggle("open",o);fab.textContent=o?"×":"💬";fab.setAttribute("aria-label",o?"Close the tutor chat":"Open the tutor chat");if(o)setTimeout(()=>chatInput.focus(),50);}
+fab.addEventListener("click",()=>openChat(!panel.classList.contains("open")));
+$("#chatClose").addEventListener("click",()=>openChat(false));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&panel.classList.contains("open"))openChat(false);});
+$$("#chatEmpty .sugg").forEach(el=>el.addEventListener("click",()=>{chatInput.value=el.dataset.q;sendChat();}));
+chatInput.addEventListener("input",()=>{chatInput.style.height="auto";chatInput.style.height=Math.min(120,chatInput.scrollHeight)+"px";});
+chatInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}});
+$("#chatSend").addEventListener("click",sendChat);
+
+function renderChat(thinking){
+  const empty=$("#chatEmpty");
+  if((CHAT.length||thinking) && empty) empty.remove();
+  if(!CHAT.length && !thinking) return; // keep the empty-state block
+  let html=CHAT.map(t=>{
+    if(t.role==="user")return `<div class="msg me">${mdlite(t.content)}</div>`;
+    if(t.role==="error")return `<div class="msg err">${mdlite(t.content)}</div>`;
+    return `<div class="msg coach-msg">${mdlite(t.content)}</div>`;
+  }).join("");
+  if(thinking) html+=`<div class="msg thinking">thinking</div>`;
+  chatBody.innerHTML=html;
+  chatBody.scrollTop=chatBody.scrollHeight;
+}
+async function sendChat(){
+  if(CHAT_BUSY)return;
+  const val=(chatInput.value||"").trim();
+  if(!val)return;
+  CHAT.push({role:"user",content:val});
+  chatInput.value="";chatInput.style.height="auto";
+  CHAT_BUSY=true;$("#chatSend").disabled=true;
+  renderChat(true);
+
+  const system=`You are a warm, sharp quant-trading interview tutor built into a study app based on Xinfeng Zhou's "A Practical Guide to Quantitative Finance Interviews" (the green book). The user is preparing for quant trading interviews, focusing on brain teasers and probability.
+
+Guidance:
+- Answer clearly and concisely — a few short paragraphs at most, or tight bullet reasoning when it helps.
+- Teach the transferable technique (simplification, symmetry, parity/invariants, induction, conditioning, Bayes, martingales, order statistics), not just the answer.
+- When a question is a known green-book puzzle and the user asks for help, prefer a guiding hint first; give the full solution if they ask outright.
+- Where natural, connect the idea to a real market scenario (pricing, hedging, risk-of-ruin, first-passage/stop-losses, no-arbitrage).
+- Plain text; you may use **bold** for key terms and \`code\` for short formulas. No long headers.`;
+
+  const messages=CHAT.filter(t=>t.role!=="error").map(t=>({role:t.role,content:t.content}));
+  try{
+    let text=(await askAI({system,messages}))||"(no response — try rephrasing)";
+    CHAT.push({role:"assistant",content:text});
+  }catch(err){
+    CHAT.push({role:"error",content:"Couldn't reach the tutor. "+aiHelpNote()+" Try again."});
+  }finally{
+    CHAT_BUSY=false;$("#chatSend").disabled=false;renderChat(false);chatInput.focus();
+  }
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+(async function(){
+  await loadAI();
+  await loadState();
+  reflectAIBadge();
+  await saveState();      // persist streak bump on open
+  renderDash();
+})();
+</script>
+</body>
+</html>
