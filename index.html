@@ -187,6 +187,9 @@
   .benchrow .bpct.hit{color:var(--green);}
   .benchhead{display:grid;grid-template-columns:190px 90px 110px 1fr 64px;gap:10px;color:var(--muted);font-size:10px;letter-spacing:.6px;padding:2px 2px 6px;border-bottom:1px solid var(--grid);}
   @media(max-width:760px){.benchhead{display:none;}}
+  .grouptabs{border-bottom:1px solid var(--grid);padding-bottom:8px;margin-bottom:10px;}
+  .grouptabs button{font-weight:700;letter-spacing:.8px;padding:7px 18px;}
+  .grouptabs button.on{background:var(--amber);color:#000;border-color:var(--amber);}
   .hidden{display:none!important;}
 </style>
 </head>
@@ -734,6 +737,7 @@ function runCommand(raw){
   const q=(raw||"").trim().toLowerCase(); if(!q)return;
   if(q==="help"||q==="f1"){ go("help"); return; }
   if(q==="math"||q==="mental"||q==="mental math"||q==="drill"){ go("math"); return; }
+  if(q==="desk"||q==="desk math"){ MATH.group="desk"; MATH.cat=GROUPS.desk.allId; go("math"); return; }
   if(q==="home"||q==="contents"||q==="f2"){ go("home"); return; }
   // section code like 4.3
   let m=q.match(/^(\d)\.(\d)$/);
@@ -830,8 +834,42 @@ const MATH_CATS = [
     return {q:`${a} <span class="op">${lab.replace("× ","×")}</span>`, a:a*m, tol:0.005};
   }}
 ];
+// ---- desk math categories (placeholder generators — user specs to replace) ----
+const DESK_CATS = [
+  {id:"eqvol", label:"EQUITY VOL", gen:()=>{
+    // vol/16 rule: annualized vol -> ~1-day expected move (sqrt(252) ≈ 16)
+    if(Math.random()<0.5){
+      const vols=[8,16,24,32,40,48,64,80];
+      const v=vols[rint(0,vols.length-1)];
+      return {q:`Stock runs <span class="op">${v}%</span> annualized vol. <span style="font-size:16px;color:var(--muted)">approx 1-day move, % (vol/16)</span>`, a:v/16, tol:0.05};
+    }
+    const dailies=[0.5,0.75,1,1.25,1.5,2,2.5,3];
+    const d=dailies[rint(0,dailies.length-1)];
+    return {q:`Stock moves <span class="op">${d}%</span> a day on average. <span style="font-size:16px;color:var(--muted)">approx annualized vol, % (×16)</span>`, a:d*16, tol:0.05};
+  }},
+  {id:"rates", label:"RATES", gen:()=>{
+    // duration P&L: notional x duration x bp move
+    const nots=[1,5,10,25,50,100], durs=[2,3,4,5,7,10], bps=[1,2,3,5,8,10];
+    const N=nots[rint(0,nots.length-1)], D=durs[rint(0,durs.length-1)], bp=bps[rint(0,bps.length-1)];
+    return {q:`$<span class="op">${N}M</span> notional, duration <span class="op">${D}</span>, yields move <span class="op">${bp}bp</span>. <span style="font-size:16px;color:var(--muted)">P&L in $ (N×D×Δy)</span>`, a:N*1e6*D*bp/10000, tol:0};
+  }},
+  {id:"fx", label:"FX", gen:()=>{
+    // cross rates from two clean legs
+    if(Math.random()<0.5){
+      const eu=[1.05,1.1,1.15,1.2,1.25][rint(0,4)], uj=[100,110,120,130,140,150,160][rint(0,6)];
+      return {q:`EURUSD <span class="op">${eu.toFixed(2)}</span>, USDJPY <span class="op">${uj}</span>. <span style="font-size:16px;color:var(--muted)">EURJPY?</span>`, a:eu*uj, tol:0.05};
+    }
+    const gb=[1.2,1.25,1.3,1.4][rint(0,3)], eu=[1.0,1.1,1.25][rint(0,2)];
+    return {q:`GBPUSD <span class="op">${gb.toFixed(2)}</span>, EURUSD <span class="op">${eu.toFixed(2)}</span>. <span style="font-size:16px;color:var(--muted)">EURGBP? (3 dp)</span>`, a:eu/gb, tol:0.005};
+  }}
+];
+const GROUPS = {
+  arith: {label:"ARITHMETIC", cats:MATH_CATS, allId:"all",     allLabel:"ALL MIXED"},
+  desk:  {label:"DESK MATH",  cats:DESK_CATS, allId:"alldesk", allLabel:"ALL DESK"}
+};
+function allCatsById(id){ return MATH_CATS.concat(DESK_CATS).find(c=>c.id===id); }
 function rint(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
-let MATH = {cat:"mult2x2", cur:null, right:0, wrong:0, streak:0, best:0, times:[], t0:0};
+let MATH = {group:"arith", cat:"mult2x2", cur:null, right:0, wrong:0, streak:0, best:0, times:[], t0:0};
 
 // ---- daily-average leaderboard store ----
 // shape: { catId: { "YYYY-MM-DD": {n: solvedCount, sum: totalSeconds} } }
@@ -847,7 +885,7 @@ const LB_MIN_QUALIFY = 5; // problems per day per category to make the board
 
 // ---- benchmark / progress store ----
 // shape: { catId: targetSecondsPerProblem } — editable in the UI, persisted locally
-const BENCH_DEFAULTS = {mult2x2:8, addsub:6, fracdec:5, percent:5, squares:5, division:10, decmult:4};
+const BENCH_DEFAULTS = {mult2x2:8, addsub:6, fracdec:5, percent:5, squares:5, division:10, decmult:4, eqvol:5, rates:5, fx:5};
 const BENCH = (function(){
   let s={};
   try{ const raw=localStorage.getItem("gbterm_bench"); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
@@ -865,7 +903,7 @@ function benchBest(catId){
 function benchDraw(){
   const el=$("#benchBody"); if(!el) return;
   let html="";
-  MATH_CATS.forEach(c=>{
+  GROUPS[MATH.group].cats.forEach(c=>{
     const best=benchBest(c.id);
     const target=BENCH.get(c.id);
     const hit = best!==null && best<=target;
@@ -895,10 +933,15 @@ function lbRecord(catId, secs){
   MATHLB.save();
 }
 function lbDays(catId){
-  // returns [{day, n, sum, avg}] for a category; catId "all" merges every category
+  // returns [{day, n, sum, avg}] for a category;
+  // "all" merges arithmetic categories only, "alldesk" merges desk categories only
   const merged={};
-  const src = catId==="all" ? Object.values(MATHLB.data) : [MATHLB.data[catId]||{}];
-  src.forEach(cat=>{
+  let ids;
+  if(catId==="all") ids=MATH_CATS.map(c=>c.id);
+  else if(catId==="alldesk") ids=DESK_CATS.map(c=>c.id);
+  else ids=[catId];
+  ids.forEach(id=>{
+    const cat=MATHLB.data[id]||{};
     Object.entries(cat).forEach(([day,cell])=>{
       const m = merged[day] = merged[day] || {n:0,sum:0};
       m.n+=cell.n; m.sum+=cell.sum;
@@ -936,8 +979,9 @@ function lbDraw(){
 }
 
 function mathNew(){
-  const pool = MATH.cat==="all" ? MATH_CATS : MATH_CATS.filter(c=>c.id===MATH.cat);
-  const cat = pool[rint(0,pool.length-1)];
+  const g=GROUPS[MATH.group];
+  const pool = MATH.cat===g.allId ? g.cats : g.cats.filter(c=>c.id===MATH.cat);
+  const cat = pool.length ? pool[rint(0,pool.length-1)] : g.cats[0];
   MATH.cur = cat.gen();
   MATH.cur.catId = cat.id;
   MATH.t0 = Date.now();
@@ -955,9 +999,15 @@ function mathCheck(){
   const fb=$("#mathFB");
   const shown = MATH.cur.tol>0 ? (Math.round(MATH.cur.a*1000)/1000) : MATH.cur.a;
   if(ok){
-    MATH.right++; MATH.streak++; MATH.best=Math.max(MATH.best,MATH.streak); MATH.times.push(secs);
-    lbRecord(MATH.cur.catId, secs);
-    fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(1)}s)`; fb.className="mathfb ok";
+    MATH.right++; MATH.streak++; MATH.best=Math.max(MATH.best,MATH.streak);
+    if(secs<=30){
+      MATH.times.push(secs);
+      lbRecord(MATH.cur.catId, secs);
+      fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(1)}s)`;
+    } else {
+      fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(0)}s — over 30s, time disregarded)`;
+    }
+    fb.className="mathfb ok";
   } else {
     MATH.wrong++; MATH.streak=0;
     fb.textContent=`✗ ANSWER: ${shown}`; fb.className="mathfb bad";
@@ -973,14 +1023,22 @@ function mathHUD(){
   $("#mStreak").textContent=MATH.streak; $("#mBest").textContent=MATH.best; $("#mAvg").textContent=avg;
 }
 function renderMath(){
-  let tabs=`<button data-c="all" class="${MATH.cat==="all"?"on":""}">ALL MIXED</button>`;
-  MATH_CATS.forEach(c=>{ tabs+=`<button data-c="${c.id}" class="${MATH.cat===c.id?"on":""}">${c.label}</button>`; });
+  const g=GROUPS[MATH.group];
+  if(!g.cats.some(c=>c.id===MATH.cat) && MATH.cat!==g.allId) MATH.cat=g.allId;
+  let gtabs="";
+  Object.entries(GROUPS).forEach(([gid,gr])=>{ gtabs+=`<button data-g="${gid}" class="${MATH.group===gid?"on":""}">${gr.label}</button>`; });
+  let tabs=`<button data-c="${g.allId}" class="${MATH.cat===g.allId?"on":""}">${g.allLabel}</button>`;
+  g.cats.forEach(c=>{ tabs+=`<button data-c="${c.id}" class="${MATH.cat===c.id?"on":""}">${c.label}</button>`; });
+  const brief = MATH.group==="desk"
+    ? `Desk mental math — the conversions traders do all day. Vol/16: annualized vol ÷ 16 ≈ 1-day move (√252 ≈ 15.9). Rates P&L: notional × duration × Δy in decimal (1bp = 0.0001). FX crosses: multiply when USD cancels across the pair (EURUSD×USDJPY), divide when it doesn't (EURUSD÷GBPUSD). <span style="color:var(--cyan)">Placeholder problem set — final specs to come.</span>`
+    : `Speed arithmetic is screened at nearly every trading and quant shop — often before you ever see a brain teaser. Type your answer and hit Enter. Decimals accept 2-3 dp rounding. Useful tricks: split 2-digit products (47×83 = 47×80 + 47×3); square via (a±b)² around a round number (97² = 100² − 2·300 + 9); memorize 1/7 ≈ 0.142857, 1/8 = 0.125, 1/12 ≈ 0.0833; ×0.25 is ÷4, ×1.5 is add half.`;
   app.innerHTML=`
     <div class="crumb"><a id="bk">CONTENTS</a><span class="sep">/</span><b>MENTAL MATH</b></div>
     <div class="panel"><div class="ttl">MENTAL MATH DRILL <span class="r">NO CALCULATOR · NO PAPER</span></div>
       <div class="body">
+        <div class="cattabs grouptabs" id="groupTabs">${gtabs}</div>
         <div class="cattabs" id="catTabs">${tabs}</div>
-        <div class="explainer"><span class="lbl">▸ DRILL BRIEF</span><div class="txt">Speed arithmetic is screened at nearly every trading and quant shop — often before you ever see a brain teaser. Type your answer and hit Enter. Decimals accept 2-3 dp rounding. Useful tricks: split 2-digit products (47×83 = 47×80 + 47×3); square via (a±b)² around a round number (97² = 100² − 2·300 + 9); memorize 1/7 ≈ 0.142857, 1/8 = 0.125, 1/12 ≈ 0.0833; ×0.25 is ÷4, ×1.5 is add half.</div></div>
+        <div class="explainer"><span class="lbl">▸ DRILL BRIEF</span><div class="txt">${brief}</div></div>
         <div class="mathq" id="mathQ"></div>
         <div class="mathin"><input id="mathA" inputmode="decimal" autocomplete="off" placeholder="answer"><button class="btn" id="mathGo">ENTER</button></div>
         <div class="mathfb" id="mathFB"></div>
@@ -1011,10 +1069,14 @@ function renderMath(){
     </div>
     <div class="pager"><button class="btn ghost" id="home2">&lt; CONTENTS</button><span></span></div>`;
   $("#bk").onclick=()=>go("home"); $("#home2").onclick=()=>go("home");
+  $("#groupTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(MATH.group!==b.dataset.g){ MATH.group=b.dataset.g; MATH.cat=GROUPS[MATH.group].allId; renderMath(); }
+  });
   $("#catTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ MATH.cat=b.dataset.c; renderMath(); });
   $("#mathGo").onclick=mathCheck;
   $("#mathA").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); mathCheck(); }});
-  const catLabel = MATH.cat==="all" ? "ALL MIXED" : MATH_CATS.find(c=>c.id===MATH.cat).label;
+  const g2=GROUPS[MATH.group];
+  const catLabel = MATH.cat===g2.allId ? g2.allLabel : (allCatsById(MATH.cat)||{label:MATH.cat}).label;
   $("#lbCatLabel").textContent = catLabel + " · BEST DAILY AVERAGES · MIN "+LB_MIN_QUALIFY+" SOLVES";
   mathHUD(); lbDraw(); benchDraw(); mathNew();
 }
