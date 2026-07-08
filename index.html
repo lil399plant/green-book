@@ -34,17 +34,38 @@
   .topbar .cmd{flex:1;display:flex;align-items:center;padding:0 10px;gap:8px;overflow:hidden;}
   .topbar .cmd input{flex:1;background:#000;color:var(--amber);border:1px solid #000;padding:5px 8px;outline:none;min-width:80px;}
   .topbar .clock{padding:6px 12px;font-weight:700;color:#000;white-space:nowrap;border-left:1px solid rgba(0,0,0,.35);}
+  .topbar .sw{display:flex;align-items:center;gap:6px;padding:0 10px;border-left:1px solid rgba(0,0,0,.35);white-space:nowrap;}
+  .topbar .sw .swtime{font-weight:700;color:#000;min-width:74px;text-align:center;}
+  .topbar .sw .swtime.running{color:#1a4d12;}
+  .topbar .sw button{background:#000;color:var(--amber);border:none;padding:4px 10px;font-weight:700;font-size:11px;letter-spacing:.5px;cursor:pointer;}
+  .topbar .sw button:hover{background:#1a1a1a;}
+  .topbar .sw button.swreset{color:var(--muted);padding:4px 7px;}
   .fkeys{display:flex;background:var(--panel);border-bottom:1px solid var(--grid);overflow-x:auto;}
   .fkey{padding:5px 12px;color:var(--muted);border-right:1px solid var(--grid);white-space:nowrap;font-size:12px;}
   .fkey b{color:var(--amber);}
 
-  /* ---------- ticker ---------- */
-  .ticker{background:#000;border-bottom:1px solid var(--grid);overflow:hidden;white-space:nowrap;}
-  .ticker .track{display:inline-block;padding:4px 0;animation:scrollx 60s linear infinite;}
-  .ticker span{padding:0 22px;color:var(--muted);font-size:12px;}
-  .ticker span b{color:var(--green);}
-  .ticker span.dn b{color:var(--red);}
-  @keyframes scrollx{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  /* ---------- mental math ---------- */
+  .mathq{font-size:34px;letter-spacing:1px;color:var(--ink);text-align:center;padding:26px 10px 8px;}
+  .mathq .op{color:var(--amber);}
+  .mathmeta{display:flex;justify-content:center;gap:26px;color:var(--muted);font-size:12px;padding-bottom:10px;}
+  .mathmeta b{color:var(--amber);}
+  .mathmeta .ok{color:var(--green);}
+  .mathmeta .bad{color:var(--red);}
+  .mathin{display:flex;gap:8px;max-width:420px;margin:0 auto;}
+  .mathin input{flex:1;background:#000;color:var(--ink);border:1px solid var(--grid);padding:10px 12px;font-size:20px;text-align:center;outline:none;}
+  .mathin input:focus{border-color:var(--amber);}
+  .mathfb{text-align:center;min-height:26px;padding:10px 0 2px;font-size:14px;}
+  .mathfb.ok{color:var(--green);}
+  .mathfb.bad{color:var(--red);}
+  .cattabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .cattabs button{background:#000;color:var(--muted);border:1px solid var(--grid);padding:6px 12px;font-size:12px;}
+  .cattabs button.on{color:var(--amber);border-color:var(--amber);}
+  .cattabs button:hover{border-color:var(--cyan);color:var(--cyan);}
+  .mathstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:14px;}
+  .mstat{background:var(--panel2);border:1px solid var(--grid);padding:8px 10px;text-align:center;}
+  .mstat .v{font-size:20px;color:var(--amber);}
+  .mstat .l{font-size:10px;color:var(--muted);letter-spacing:.5px;}
+  @keyframes blink2{0%,50%{opacity:1}50.01%,100%{opacity:0}}
 
   .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 60px;}
 
@@ -140,6 +161,32 @@
   .explainer .lbl{color:var(--cyan);font-size:11px;letter-spacing:.5px;}
   .explainer .txt{margin-top:5px;color:var(--ink);opacity:.9;line-height:1.6;font-size:12.5px;}
   .concept-note{border:1px dashed var(--grid);background:var(--grid2);color:var(--muted);padding:9px 12px;margin-bottom:8px;font-size:12px;}
+  .lbtable{width:100%;border-collapse:collapse;font-size:13px;}
+  .lbtable th{color:var(--muted);font-size:10px;letter-spacing:.6px;text-align:left;padding:6px 10px;border-bottom:1px solid var(--grid);font-weight:400;}
+  .lbtable td{padding:7px 10px;border-bottom:1px solid var(--grid2);color:var(--ink);}
+  .lbtable .rk{width:44px;text-align:center;}
+  .lbtable th.num,.lbtable td.num{text-align:right;}
+  .lbtable td.num{color:var(--amber);}
+  .lbtable tr.today td{background:var(--sel);}
+  .lbtable tr.today td:first-child{border-left:2px solid var(--green);}
+  .lbtable .tag{font-size:9px;color:var(--green);border:1px solid var(--green);padding:0 4px;margin-left:6px;letter-spacing:.5px;}
+  .lbtable .lbempty{color:var(--muted);text-align:center;padding:16px 10px;}
+  .lbnote{color:var(--muted);font-size:12px;padding:8px 2px 0;}
+  .benchrow{display:grid;grid-template-columns:190px 90px 110px 1fr 64px;gap:10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--grid2);}
+  @media(max-width:760px){.benchrow{grid-template-columns:1fr 70px 90px;} .benchrow .bbar,.benchrow .bpct{grid-column:1/-1;}}
+  .benchrow .blabel{color:var(--ink);font-size:12px;}
+  .benchrow .bbest{color:var(--amber);font-size:13px;text-align:right;}
+  .benchrow .bbest.none{color:var(--muted);}
+  .benchrow .btarget{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;}
+  .benchrow .btarget input{width:52px;background:#000;color:var(--cyan);border:1px solid var(--grid);padding:3px 5px;text-align:right;outline:none;font-size:12px;}
+  .benchrow .btarget input:focus{border-color:var(--cyan);}
+  .benchrow .bbar{height:10px;background:var(--grid2);border:1px solid var(--grid);position:relative;}
+  .benchrow .bbar>i{display:block;height:100%;background:var(--amber);transition:width .3s;}
+  .benchrow .bbar.hit>i{background:var(--green);}
+  .benchrow .bpct{font-size:12px;color:var(--muted);text-align:right;}
+  .benchrow .bpct.hit{color:var(--green);}
+  .benchhead{display:grid;grid-template-columns:190px 90px 110px 1fr 64px;gap:10px;color:var(--muted);font-size:10px;letter-spacing:.6px;padding:2px 2px 6px;border-bottom:1px solid var(--grid);}
+  @media(max-width:760px){.benchhead{display:none;}}
   .hidden{display:none!important;}
 </style>
 </head>
@@ -151,6 +198,7 @@
     <input id="cmdInput" placeholder="type a problem name or chapter #, then Enter  (e.g. monty, 4.3, pirates)" autocomplete="off">
     <span style="color:#000;font-weight:700">&lt;GO&gt;</span>
   </div>
+  <div class="sw"><span class="swtime" id="swTime">00:00.0</span><button id="swToggle">START</button><button class="swreset" id="swReset">⟲</button></div>
   <div class="clock" id="clock">--:--:--</div>
 </div>
 <div class="fkeys">
@@ -160,8 +208,6 @@
   <div class="fkey"><b>TUTOR</b> CLAUDE-POWERED</div>
   <div class="fkey"><b>SRC</b> ZHOU · QUANT INTERVIEWS</div>
 </div>
-<div class="ticker"><div class="track" id="ticker"></div></div>
-
 <div class="wrap scroll" id="app"></div>
 
 <script>
@@ -477,6 +523,7 @@ function render(){
   if(state.view==="chapter") return renderChapter(state.chap);
   if(state.view==="problem") return renderProblem(state.prob);
   if(state.view==="help") return renderHelp();
+  if(state.view==="math") return renderMath();
 }
 
 // ---- HOME / shelf ----
@@ -495,13 +542,20 @@ function renderHome(){
   app.innerHTML=`
     <div class="prompt">> LOADING <b>QUANT.INTERVIEW.TRAINER</b> :: 7 CHAPTERS · 33 SECTIONS · ${TOTAL} PROBLEMS · ${solved} SOLVED</div>
     <div class="panel"><div class="ttl">TABLE OF CONTENTS <span class="r">SELECT CHAPTER &lt;GO&gt;</span></div>
-      <div class="body"><div class="grid7">${cards}</div></div>
+      <div class="body"><div class="grid7">${cards}
+        <div class="chapcard" id="mathCard">
+          <div class="hd"><div class="cno">Σ</div><div class="cttl">Mental Math</div></div>
+          <div class="meta"><span>SPEED ARITHMETIC DRILL · 7 MODES</span><span>∞</span></div>
+          <div class="bar"><i style="width:100%;background:var(--cyan)"></i></div>
+        </div>
+      </div></div>
     </div>
     <div class="panel"><div class="ttl">TERMINAL NOTES</div><div class="body blurb">
-Navigate like the book: <b style="color:var(--amber)">Chapter → Section → Problem</b>. Each chapter opens with a concept brief. Under every section, open a problem to read it, work it in the <span style="color:var(--amber)">CLAUDE TUTOR</span> chat, submit an answer, and reveal the full solution. Use the <span style="color:var(--amber)">CMD</span> line up top to jump anywhere — try <span style="color:var(--cyan)">monty</span>, <span style="color:var(--cyan)">4.3</span>, or <span style="color:var(--cyan)">pirates</span>.
+Navigate like the book: <b style="color:var(--amber)">Chapter → Section → Problem</b>. Each chapter opens with a concept brief. Under every section, open a problem to read it, work it in the <span style="color:var(--amber)">CLAUDE TUTOR</span> chat, submit an answer, and reveal the full solution. Use the <span style="color:var(--amber)">CMD</span> line up top to jump anywhere — try <span style="color:var(--cyan)">monty</span>, <span style="color:var(--cyan)">4.3</span>, <span style="color:var(--cyan)">pirates</span>, or <span style="color:var(--cyan)">math</span> for the drill.
     </div></div>
     <div class="foot">GREEN BOOK TERMINAL · an interactive trainer after <b>A Practical Guide to Quantitative Finance Interviews</b> (Xinfeng Zhou).<br>Problem statements & solutions are original restatements of classic problems. Tutor replies come from Claude.</div>`;
-  app.querySelectorAll(".chapcard").forEach(cd=>cd.onclick=()=>go("chapter",{chap:cd.dataset.chap}));
+  app.querySelectorAll(".chapcard[data-chap]").forEach(cd=>cd.onclick=()=>go("chapter",{chap:cd.dataset.chap}));
+  $("#mathCard").onclick=()=>go("math");
 }
 
 // ---- CHAPTER ----
@@ -679,6 +733,7 @@ function renderHelp(){
 function runCommand(raw){
   const q=(raw||"").trim().toLowerCase(); if(!q)return;
   if(q==="help"||q==="f1"){ go("help"); return; }
+  if(q==="math"||q==="mental"||q==="mental math"||q==="drill"){ go("math"); return; }
   if(q==="home"||q==="contents"||q==="f2"){ go("home"); return; }
   // section code like 4.3
   let m=q.match(/^(\d)\.(\d)$/);
@@ -703,18 +758,266 @@ document.querySelectorAll(".fkey").forEach(fk=>{ if(/HELP/.test(fk.textContent))
 function tick(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); $("#clock").textContent=p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds())+" ET"; }
 setInterval(tick,1000); tick();
 
-// ---- ticker (chapter headline crawl) ----
-(function(){
-  const items=[
-    ["BRAIN TEASERS","+9 SECS"],["PROBABILITY","+42 PROB"],["STOCH CALC","+16 PROB"],
-    ["FINANCE","+18 PROB"],["ALGORITHMS","+15 PROB"],["CALCULUS/LA","+18 PROB"],
-    ["MONTY HALL","2/3"],["DRUNK PASSENGER","1/2"],["PIRATES","98-0-1-0-1"],["BURNING ROPES","45MIN"],
-    ["POISON WINE","10 TESTERS"],["ITO","dW²=dt"],["PUT-CALL PARITY","C-P=S-Ke^-rT"],["FISHER-YATES","O(n)"]
-  ];
-  let html="";
-  for(let k=0;k<2;k++){ items.forEach((it,idx)=>{ const dn=idx%3===0?" dn":""; html+=`<span class="${dn}">${it[0]} <b>${it[1]}</b></span>`; }); }
-  $("#ticker").innerHTML=html;
+// ---- global stopwatch ----
+const SW = {running:false, elapsed:0, t0:0, iv:null};
+function swFmt(ms){
+  const t=Math.max(0,ms);
+  const m=Math.floor(t/60000), s=Math.floor((t%60000)/1000), d=Math.floor((t%1000)/100);
+  return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+"."+d;
+}
+function swDraw(){
+  const now = SW.running ? SW.elapsed + (Date.now()-SW.t0) : SW.elapsed;
+  const el=$("#swTime"); el.textContent=swFmt(now);
+  el.classList.toggle("running", SW.running);
+}
+function swToggle(){
+  if(SW.running){
+    SW.elapsed += Date.now()-SW.t0; SW.running=false;
+    clearInterval(SW.iv); SW.iv=null;
+    $("#swToggle").textContent="START";
+  } else {
+    SW.t0=Date.now(); SW.running=true;
+    SW.iv=setInterval(swDraw,100);
+    $("#swToggle").textContent="STOP";
+  }
+  swDraw();
+}
+function swReset(){
+  SW.elapsed=0;
+  if(SW.running) SW.t0=Date.now();
+  swDraw();
+}
+$("#swToggle").onclick=swToggle;
+$("#swReset").onclick=swReset;
+swDraw();
+
+// ---- mental math module ----
+const MATH_CATS = [
+  {id:"mult2x2", label:"2-DIGIT × 2-DIGIT", gen:()=>{
+    const a=rint(12,99), b=rint(12,99);
+    return {q:`${a} <span class="op">×</span> ${b}`, a:a*b, tol:0};
+  }},
+  {id:"addsub", label:"3+ DIGIT ADD/SUB", gen:()=>{
+    const dig=Math.random()<0.5?3:4;
+    const lo=Math.pow(10,dig-1), hi=Math.pow(10,dig)-1;
+    const a=rint(lo,hi), b=rint(lo,hi);
+    if(Math.random()<0.5) return {q:`${a} <span class="op">+</span> ${b}`, a:a+b, tol:0};
+    const big=Math.max(a,b), small=Math.min(a,b);
+    return {q:`${big} <span class="op">−</span> ${small}`, a:big-small, tol:0};
+  }},
+  {id:"fracdec", label:"FRACTION → DECIMAL", gen:()=>{
+    const dens=[3,4,5,6,7,8,9,11,12,15,16,20,25];
+    const d=dens[rint(0,dens.length-1)];
+    let n=rint(1,d-1);
+    return {q:`${n}<span class="op">/</span>${d} <span style="font-size:16px;color:var(--muted)">as a decimal (3 dp)</span>`, a:n/d, tol:0.0005};
+  }},
+  {id:"percent", label:"PERCENTAGES", gen:()=>{
+    const p=rint(2,45), base=rint(3,96)*10;
+    return {q:`${p}<span class="op">%</span> of ${base}`, a:p*base/100, tol:0.005};
+  }},
+  {id:"squares", label:"2-DIGIT SQUARES", gen:()=>{
+    const a=rint(11,99);
+    return {q:`${a}<span class="op">²</span>`, a:a*a, tol:0};
+  }},
+  {id:"division", label:"DIVISION (2 DP)", gen:()=>{
+    const b=rint(3,19), a=rint(7,99)*b + rint(1,b-1); // non-integer result
+    return {q:`${a} <span class="op">÷</span> ${b} <span style="font-size:16px;color:var(--muted)">(2 dp)</span>`, a:a/b, tol:0.005};
+  }},
+  {id:"decmult", label:"DECIMAL SHORTCUTS", gen:()=>{
+    const decs=[[0.25,"× 0.25"],[0.5,"× 0.5"],[0.75,"× 0.75"],[1.5,"× 1.5"],[0.125,"× 0.125"],[2.5,"× 2.5"],[0.2,"× 0.2"]];
+    const [m,lab]=decs[rint(0,decs.length-1)];
+    const a=rint(8,200)*(m===0.125?8:4)/4; // keep answers clean-ish
+    return {q:`${a} <span class="op">${lab.replace("× ","×")}</span>`, a:a*m, tol:0.005};
+  }}
+];
+function rint(lo,hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+let MATH = {cat:"mult2x2", cur:null, right:0, wrong:0, streak:0, best:0, times:[], t0:0};
+
+// ---- daily-average leaderboard store ----
+// shape: { catId: { "YYYY-MM-DD": {n: solvedCount, sum: totalSeconds} } }
+const MATHLB = (function(){
+  let s={};
+  try{ const raw=localStorage.getItem("gbterm_mathlb"); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
+  return {
+    data:s,
+    save(){ try{ localStorage.setItem("gbterm_mathlb",JSON.stringify(s)); }catch(e){} }
+  };
 })();
+const LB_MIN_QUALIFY = 5; // problems per day per category to make the board
+
+// ---- benchmark / progress store ----
+// shape: { catId: targetSecondsPerProblem } — editable in the UI, persisted locally
+const BENCH_DEFAULTS = {mult2x2:8, addsub:6, fracdec:5, percent:5, squares:5, division:10, decmult:4};
+const BENCH = (function(){
+  let s={};
+  try{ const raw=localStorage.getItem("gbterm_bench"); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
+  return {
+    get:id => (typeof s[id]==="number" && s[id]>0) ? s[id] : BENCH_DEFAULTS[id],
+    set(id,v){ s[id]=v; try{ localStorage.setItem("gbterm_bench",JSON.stringify(s)); }catch(e){} }
+  };
+})();
+function benchBest(catId){
+  // best (lowest) qualifying daily average for this category, or null
+  const q=lbDays(catId).filter(r=>r.n>=LB_MIN_QUALIFY);
+  if(!q.length) return null;
+  return Math.min(...q.map(r=>r.avg));
+}
+function benchDraw(){
+  const el=$("#benchBody"); if(!el) return;
+  let html="";
+  MATH_CATS.forEach(c=>{
+    const best=benchBest(c.id);
+    const target=BENCH.get(c.id);
+    const hit = best!==null && best<=target;
+    const pct = best===null ? 0 : Math.min(100, Math.round(100*target/best));
+    html+=`<div class="benchrow">
+      <div class="blabel">${c.label}</div>
+      <div class="bbest ${best===null?'none':''}">${best===null?'—':best.toFixed(1)+'s'}</div>
+      <div class="btarget">TGT <input type="number" min="0.5" step="0.5" value="${target}" data-bench="${c.id}"> s</div>
+      <div class="bbar ${hit?'hit':''}"><i style="width:${pct}%"></i></div>
+      <div class="bpct ${hit?'hit':''}">${best===null?'—':(hit?'HIT ✓':pct+'%')}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+  el.querySelectorAll("input[data-bench]").forEach(inp=>{
+    inp.onchange=()=>{ const v=parseFloat(inp.value); if(isFinite(v)&&v>0){ BENCH.set(inp.dataset.bench,v); benchDraw(); } };
+  });
+}
+function lbToday(){
+  const d=new Date(); const p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function lbRecord(catId, secs){
+  const day=lbToday();
+  const cat = MATHLB.data[catId] = MATHLB.data[catId] || {};
+  const cell = cat[day] = cat[day] || {n:0, sum:0};
+  cell.n++; cell.sum+=secs;
+  MATHLB.save();
+}
+function lbDays(catId){
+  // returns [{day, n, sum, avg}] for a category; catId "all" merges every category
+  const merged={};
+  const src = catId==="all" ? Object.values(MATHLB.data) : [MATHLB.data[catId]||{}];
+  src.forEach(cat=>{
+    Object.entries(cat).forEach(([day,cell])=>{
+      const m = merged[day] = merged[day] || {n:0,sum:0};
+      m.n+=cell.n; m.sum+=cell.sum;
+    });
+  });
+  return Object.entries(merged).map(([day,c])=>({day, n:c.n, sum:c.sum, avg:c.sum/c.n}));
+}
+function lbDraw(){
+  const el=$("#lbBody"); if(!el) return;
+  const today=lbToday();
+  const rows=lbDays(MATH.cat);
+  const qualified=rows.filter(r=>r.n>=LB_MIN_QUALIFY).sort((a,b)=>a.avg-b.avg).slice(0,10);
+  let html="";
+  if(!qualified.length){
+    html=`<tr><td colspan="4" class="lbempty">No qualifying days yet — solve ${LB_MIN_QUALIFY}+ problems in a day to enter the board.</td></tr>`;
+  } else {
+    qualified.forEach((r,i)=>{
+      const isToday=r.day===today;
+      const medal = i===0?"🥇": i===1?"🥈": i===2?"🥉": String(i+1);
+      html+=`<tr class="${isToday?'today':''}"><td class="rk">${medal}</td><td>${r.day}${isToday?' <span class="tag">TODAY</span>':''}</td><td class="num">${r.avg.toFixed(1)}s</td><td class="num">${r.n}</td></tr>`;
+    });
+  }
+  // today's progress line if not yet qualified (or not on the board)
+  const t=rows.find(r=>r.day===today);
+  let note="";
+  if(t && t.n<LB_MIN_QUALIFY){
+    note=`Today so far: ${t.avg.toFixed(1)}s avg over ${t.n} — ${LB_MIN_QUALIFY-t.n} more to qualify.`;
+  } else if(t && !qualified.some(r=>r.day===today)){
+    note=`Today: ${t.avg.toFixed(1)}s avg over ${t.n} — outside the top 10.`;
+  } else if(!t){
+    note=`No solves recorded today in this category yet.`;
+  }
+  el.innerHTML=html;
+  $("#lbNote").textContent=note;
+}
+
+function mathNew(){
+  const pool = MATH.cat==="all" ? MATH_CATS : MATH_CATS.filter(c=>c.id===MATH.cat);
+  const cat = pool[rint(0,pool.length-1)];
+  MATH.cur = cat.gen();
+  MATH.cur.catId = cat.id;
+  MATH.t0 = Date.now();
+  $("#mathQ").innerHTML = MATH.cur.q + " <span class='op'>=</span> ?";
+  const inp=$("#mathA"); inp.value=""; inp.focus();
+  $("#mathFB").textContent=""; $("#mathFB").className="mathfb";
+}
+function mathCheck(){
+  if(!MATH.cur) return;
+  const raw=($("#mathA").value||"").trim().replace(/,/g,"");
+  if(raw==="") return;
+  const guess=parseFloat(raw);
+  const secs=((Date.now()-MATH.t0)/1000);
+  const ok = isFinite(guess) && Math.abs(guess - MATH.cur.a) <= (MATH.cur.tol||0) + 1e-9;
+  const fb=$("#mathFB");
+  const shown = MATH.cur.tol>0 ? (Math.round(MATH.cur.a*1000)/1000) : MATH.cur.a;
+  if(ok){
+    MATH.right++; MATH.streak++; MATH.best=Math.max(MATH.best,MATH.streak); MATH.times.push(secs);
+    lbRecord(MATH.cur.catId, secs);
+    fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(1)}s)`; fb.className="mathfb ok";
+  } else {
+    MATH.wrong++; MATH.streak=0;
+    fb.textContent=`✗ ANSWER: ${shown}`; fb.className="mathfb bad";
+  }
+  mathHUD(); lbDraw(); benchDraw();
+  setTimeout(mathNew, ok?650:1400);
+}
+function mathHUD(){
+  const avg = MATH.times.length? (MATH.times.reduce((a,b)=>a+b,0)/MATH.times.length).toFixed(1)+"s" : "—";
+  const total=MATH.right+MATH.wrong;
+  const acc = total? Math.round(100*MATH.right/total)+"%" : "—";
+  $("#mSolved").textContent=MATH.right; $("#mAcc").textContent=acc;
+  $("#mStreak").textContent=MATH.streak; $("#mBest").textContent=MATH.best; $("#mAvg").textContent=avg;
+}
+function renderMath(){
+  let tabs=`<button data-c="all" class="${MATH.cat==="all"?"on":""}">ALL MIXED</button>`;
+  MATH_CATS.forEach(c=>{ tabs+=`<button data-c="${c.id}" class="${MATH.cat===c.id?"on":""}">${c.label}</button>`; });
+  app.innerHTML=`
+    <div class="crumb"><a id="bk">CONTENTS</a><span class="sep">/</span><b>MENTAL MATH</b></div>
+    <div class="panel"><div class="ttl">MENTAL MATH DRILL <span class="r">NO CALCULATOR · NO PAPER</span></div>
+      <div class="body">
+        <div class="cattabs" id="catTabs">${tabs}</div>
+        <div class="explainer"><span class="lbl">▸ DRILL BRIEF</span><div class="txt">Speed arithmetic is screened at nearly every trading and quant shop — often before you ever see a brain teaser. Type your answer and hit Enter. Decimals accept 2-3 dp rounding. Useful tricks: split 2-digit products (47×83 = 47×80 + 47×3); square via (a±b)² around a round number (97² = 100² − 2·300 + 9); memorize 1/7 ≈ 0.142857, 1/8 = 0.125, 1/12 ≈ 0.0833; ×0.25 is ÷4, ×1.5 is add half.</div></div>
+        <div class="mathq" id="mathQ"></div>
+        <div class="mathin"><input id="mathA" inputmode="decimal" autocomplete="off" placeholder="answer"><button class="btn" id="mathGo">ENTER</button></div>
+        <div class="mathfb" id="mathFB"></div>
+        <div class="mathstats">
+          <div class="mstat"><div class="v" id="mSolved">0</div><div class="l">SOLVED</div></div>
+          <div class="mstat"><div class="v" id="mAcc">—</div><div class="l">ACCURACY</div></div>
+          <div class="mstat"><div class="v" id="mStreak">0</div><div class="l">STREAK</div></div>
+          <div class="mstat"><div class="v" id="mBest">0</div><div class="l">BEST STREAK</div></div>
+          <div class="mstat"><div class="v" id="mAvg">—</div><div class="l">AVG TIME</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel"><div class="ttl">DAILY LEADERBOARD <span class="r" id="lbCatLabel"></span></div>
+      <div class="body">
+        <table class="lbtable">
+          <thead><tr><th class="rk">#</th><th>DAY</th><th class="num">AVG / PROBLEM</th><th class="num">SOLVED</th></tr></thead>
+          <tbody id="lbBody"></tbody>
+        </table>
+        <div class="lbnote" id="lbNote"></div>
+      </div>
+    </div>
+    <div class="panel"><div class="ttl">PROGRESS TO BENCHMARK <span class="r">BEST QUALIFYING DAY vs TARGET · EDIT TGT TO SET</span></div>
+      <div class="body">
+        <div class="benchhead"><div>MODE</div><div style="text-align:right">BEST AVG</div><div>BENCHMARK</div><div>PROGRESS</div><div style="text-align:right">STATUS</div></div>
+        <div id="benchBody"></div>
+        <div class="lbnote">Progress = benchmark ÷ your best qualifying daily average. Bar fills as your best day approaches the target; green means benchmark hit.</div>
+      </div>
+    </div>
+    <div class="pager"><button class="btn ghost" id="home2">&lt; CONTENTS</button><span></span></div>`;
+  $("#bk").onclick=()=>go("home"); $("#home2").onclick=()=>go("home");
+  $("#catTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ MATH.cat=b.dataset.c; renderMath(); });
+  $("#mathGo").onclick=mathCheck;
+  $("#mathA").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); mathCheck(); }});
+  const catLabel = MATH.cat==="all" ? "ALL MIXED" : MATH_CATS.find(c=>c.id===MATH.cat).label;
+  $("#lbCatLabel").textContent = catLabel + " · BEST DAILY AVERAGES · MIN "+LB_MIN_QUALIFY+" SOLVES";
+  mathHUD(); lbDraw(); benchDraw(); mathNew();
+}
 
 // ---- boot ----
 render();
