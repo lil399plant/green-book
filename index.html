@@ -925,7 +925,9 @@ function lbToday(){
   const d=new Date(); const p=n=>String(n).padStart(2,"0");
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
+const LB_MAX_TIME = 30; // seconds — answers slower than this never enter averages
 function lbRecord(catId, secs){
+  if(secs > LB_MAX_TIME) return; // defensive: benchmark + leaderboard both read this store
   const day=lbToday();
   const cat = MATHLB.data[catId] = MATHLB.data[catId] || {};
   const cell = cat[day] = cat[day] || {n:0, sum:0};
@@ -1000,12 +1002,12 @@ function mathCheck(){
   const shown = MATH.cur.tol>0 ? (Math.round(MATH.cur.a*1000)/1000) : MATH.cur.a;
   if(ok){
     MATH.right++; MATH.streak++; MATH.best=Math.max(MATH.best,MATH.streak);
-    if(secs<=30){
+    if(secs<=LB_MAX_TIME){
       MATH.times.push(secs);
       lbRecord(MATH.cur.catId, secs);
       fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(1)}s)`;
     } else {
-      fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(0)}s — over 30s, time disregarded)`;
+      fb.textContent=`✓ CORRECT — ${shown}  (${secs.toFixed(0)}s — over ${LB_MAX_TIME}s, time disregarded)`;
     }
     fb.className="mathfb ok";
   } else {
