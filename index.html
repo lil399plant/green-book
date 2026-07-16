@@ -190,6 +190,12 @@
   .grouptabs{border-bottom:1px solid var(--grid);padding-bottom:8px;margin-bottom:10px;}
   .grouptabs button{font-weight:700;letter-spacing:.8px;padding:7px 18px;}
   .grouptabs button.on{background:var(--amber);color:#000;border-color:var(--amber);}
+  .lbfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:8px;}
+  .lbfoot .lbnote{padding:0;}
+  .lbreset{font-size:10px;padding:4px 10px;color:var(--muted);border-color:var(--grid);}
+  .lbreset:hover{color:var(--red);border-color:var(--red);}
+  #app sup{font-size:0.72em;vertical-align:super;line-height:0;}
+  #app sub{font-size:0.72em;vertical-align:sub;line-height:0;}
   .hidden{display:none!important;}
 </style>
 </head>
@@ -504,6 +510,49 @@ function findFlat(pid){ return FLAT.findIndex(f=>f.prob.id===pid); }
 const $ = sel => document.querySelector(sel);
 const app = $("#app");
 function esc(s){ return (s||"").replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])); }
+// Converts plain-text math notation (already HTML-escaped) into real superscript/subscript.
+//   x^2          -> x<sup>2</sup>
+//   e^(-rT)      -> e<sup>-rT</sup>
+//   (ln x)^(ln x)-> (ln x)<sup>ln x</sup>
+//   a_i, a_{i+1} -> a<sub>i</sub>, a<sub>i+1</sub>
+// Skips "^=" (used once, in the Number swap XOR code) so code text isn't mangled.
+function mathify(s){
+  if(!s) return s;
+  function grab(str,openIdx,openCh,closeCh){
+    let depth=1, j=openIdx+1;
+    while(j<str.length && depth>0){
+      if(str[j]===openCh) depth++;
+      else if(str[j]===closeCh) depth--;
+      j++;
+    }
+    return {inner:str.slice(openIdx+1,j-1), end:j};
+  }
+  function bareToken(str,i){
+    const m=/^-?(?:[\p{L}\p{N}]+|\.\.\.|∞)/u.exec(str.slice(i));
+    return m?m[0]:null;
+  }
+  let out="", i=0;
+  while(i<s.length){
+    const ch=s[i];
+    if(ch==="^" && s[i+1]!=="="){
+      if(s[i+1]==="("){ const g=grab(s,i+1,"(",")"); out+="<sup>"+mathify(g.inner)+"</sup>"; i=g.end; continue; }
+      if(s[i+1]==="{"){ const g=grab(s,i+1,"{","}"); out+="<sup>"+mathify(g.inner)+"</sup>"; i=g.end; continue; }
+      const tok=bareToken(s,i+1);
+      if(tok){ out+="<sup>"+tok+"</sup>"; i+=1+tok.length; continue; }
+    }
+    if(ch==="_"){
+      const prev=s[i-1];
+      if(prev && !/[\s,.;:!?'"(\[{]/.test(prev)){
+        if(s[i+1]==="{"){ const g=grab(s,i+1,"{","}"); out+="<sub>"+mathify(g.inner)+"</sub>"; i=g.end; continue; }
+        if(s[i+1]==="("){ const g=grab(s,i+1,"(",")"); out+="<sub>"+mathify(g.inner)+"</sub>"; i=g.end; continue; }
+        const tok=bareToken(s,i+1);
+        if(tok){ out+="<sub>"+tok+"</sub>"; i+=1+tok.length; continue; }
+      }
+    }
+    out+=ch; i++;
+  }
+  return out;
+}
 function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstChild; }
 
 function statusOf(pid){ const p=PROG.get(pid); return p?p.status:null; }
@@ -574,13 +623,13 @@ function renderChapter(chapId){
       cards+=`<div class="pcard ${cls}" data-prob="${p.id}"><span class="nm">${esc(p.title)}</span><span class="st">${label}</span></div>`;
     });
     secs+=`<div class="subttl"><span>${esc(sub.title)}</span><span class="code">${sub.id}</span></div>
-      ${sub.expl?`<div class="explainer"><span class="lbl">▸ SECTION BRIEF</span><div class="txt">${esc(sub.expl)}</div></div>`:``}
+      ${sub.expl?`<div class="explainer"><span class="lbl">▸ SECTION BRIEF</span><div class="txt">${mathify(esc(sub.expl))}</div></div>`:``}
       ${sub.probs.length?`<div class="plist">${cards}</div>`:`<div class="concept-note">Concept section — the book presents this as background without a standalone named problem.</div>`}`;
   });
   app.innerHTML=`
     <div class="crumb"><a id="bk">CONTENTS</a><span class="sep">/</span><b>CH ${c.num} — ${esc(c.title.toUpperCase())}</b></div>
     <div class="panel"><div class="ttl">CHAPTER ${c.num} · ${esc(c.title.toUpperCase())} <span class="r">CONCEPT BRIEF</span></div>
-      <div class="body blurb">${esc(c.blurb)}</div>
+      <div class="body blurb">${mathify(esc(c.blurb))}</div>
     </div>
     ${secs}
     <div class="pager"><button class="btn ghost" id="home2">&lt; CONTENTS</button><span></span></div>`;
@@ -604,8 +653,8 @@ function renderProblem(pid){
       <div>
         <div class="panel"><div class="ttl">${esc(prob.title.toUpperCase())} <span class="r">${sub.id} · ${chap.num}</span></div>
           <div class="body">
-            ${sub.expl?`<div class="explainer"><span class="lbl">▸ ${esc(sub.title.toUpperCase())} · ${sub.id}</span><div class="txt">${esc(sub.expl)}</div></div>`:``}
-            <div class="statement">${esc(prob.statement)}</div>
+            ${sub.expl?`<div class="explainer"><span class="lbl">▸ ${esc(sub.title.toUpperCase())} · ${sub.id}</span><div class="txt">${mathify(esc(sub.expl))}</div></div>`:``}
+            <div class="statement">${mathify(esc(prob.statement))}</div>
             <div class="ansrow">
               <input id="ansInput" placeholder="scratch your answer / final number here…" autocomplete="off">
             </div>
@@ -645,11 +694,11 @@ function renderProblem(pid){
   $("#bkHome").onclick=()=>go("home");
   $("#bkChap").onclick=()=>go("chapter",{chap:chap.id});
   if(hasHint) $("#hintBtn").onclick=()=>{
-    $("#hintSlot").innerHTML=`<div class="hintbox"><div class="lbl">▸ HINT</div><div class="txt">${esc(prob.hint)}</div></div>`;
+    $("#hintSlot").innerHTML=`<div class="hintbox"><div class="lbl">▸ HINT</div><div class="txt">${mathify(esc(prob.hint))}</div></div>`;
     $("#hintBtn").disabled=true;
   };
   $("#revealBtn").onclick=()=>{
-    $("#solSlot").innerHTML=`<div class="solbox"><div class="lbl">▸ SOLUTION</div><div class="txt">${esc(prob.solution)}</div></div>`;
+    $("#solSlot").innerHTML=`<div class="solbox"><div class="lbl">▸ SOLUTION</div><div class="txt">${mathify(esc(prob.solution))}</div></div>`;
     if(statusOf(pid)!=="solved") PROG.set(pid,{status:"revealed"});
   };
   $("#solveBtn").onclick=()=>{ PROG.set(pid,{status:"solved"}); $("#solveBtn").textContent="✓ SOLVED"; $("#solveBtn").disabled=true; refreshProgHeader(); };
@@ -797,8 +846,20 @@ swDraw();
 
 // ---- mental math module ----
 const MATH_CATS = [
-  {id:"mult2x2", label:"2-DIGIT × 2-DIGIT", gen:()=>{
-    const a=rint(12,99), b=rint(12,99);
+  {id:"mult1x2", label:"1-DIGIT × 2-DIGIT", gen:()=>{
+    const a=rint(2,9), b=rint(12,99);
+    return {q:`${a} <span class="op">×</span> ${b}`, a:a*b, tol:0};
+  }},
+  {id:"mult2x2e", label:"2×2 EASY", gen:()=>{
+    const a=rint(12,29), b=rint(12,29);
+    return {q:`${a} <span class="op">×</span> ${b}`, a:a*b, tol:0};
+  }},
+  {id:"mult2x2", label:"2×2 MEDIUM", gen:()=>{
+    const a=rint(30,69), b=rint(30,69);
+    return {q:`${a} <span class="op">×</span> ${b}`, a:a*b, tol:0};
+  }},
+  {id:"mult2x2h", label:"2×2 HARD", gen:()=>{
+    const a=rint(70,99), b=rint(70,99);
     return {q:`${a} <span class="op">×</span> ${b}`, a:a*b, tol:0};
   }},
   {id:"addsub", label:"3+ DIGIT ADD/SUB", gen:()=>{
@@ -885,7 +946,7 @@ const LB_MIN_QUALIFY = 5; // problems per day per category to make the board
 
 // ---- benchmark / progress store ----
 // shape: { catId: targetSecondsPerProblem } — editable in the UI, persisted locally
-const BENCH_DEFAULTS = {mult2x2:8, addsub:6, fracdec:5, percent:5, squares:5, division:10, decmult:4, eqvol:5, rates:5, fx:5};
+const BENCH_DEFAULTS = {mult1x2:3, mult2x2e:5, mult2x2:8, mult2x2h:12, addsub:6, fracdec:5, percent:5, squares:5, division:10, decmult:4, eqvol:5, rates:5, fx:5};
 const BENCH = (function(){
   let s={};
   try{ const raw=localStorage.getItem("gbterm_bench"); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
@@ -925,7 +986,7 @@ function lbToday(){
   const d=new Date(); const p=n=>String(n).padStart(2,"0");
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-const LB_MAX_TIME = 30; // seconds — answers slower than this never enter averages
+const LB_MAX_TIME = 50; // seconds — answers slower than this never enter averages
 function lbRecord(catId, secs){
   if(secs > LB_MAX_TIME) return; // defensive: benchmark + leaderboard both read this store
   const day=lbToday();
@@ -950,6 +1011,19 @@ function lbDays(catId){
     });
   });
   return Object.entries(merged).map(([day,c])=>({day, n:c.n, sum:c.sum, avg:c.sum/c.n}));
+}
+function lbResetToday(catId){
+  const day=lbToday();
+  const ids = catId==="all" ? MATH_CATS.map(c=>c.id)
+            : catId==="alldesk" ? DESK_CATS.map(c=>c.id)
+            : [catId];
+  let removed=0;
+  ids.forEach(id=>{
+    const cat=MATHLB.data[id];
+    if(cat && cat[day]){ delete cat[day]; removed++; if(!Object.keys(cat).length) delete MATHLB.data[id]; }
+  });
+  if(removed) MATHLB.save();
+  return removed;
 }
 function lbDraw(){
   const el=$("#lbBody"); if(!el) return;
@@ -981,6 +1055,8 @@ function lbDraw(){
 }
 
 function mathNew(){
+  if(MATH.nextT){ clearTimeout(MATH.nextT); MATH.nextT=null; }
+  if(MATH.cdI){ clearInterval(MATH.cdI); MATH.cdI=null; }
   const g=GROUPS[MATH.group];
   const pool = MATH.cat===g.allId ? g.cats : g.cats.filter(c=>c.id===MATH.cat);
   const cat = pool.length ? pool[rint(0,pool.length-1)] : g.cats[0];
@@ -1012,10 +1088,16 @@ function mathCheck(){
     fb.className="mathfb ok";
   } else {
     MATH.wrong++; MATH.streak=0;
-    fb.textContent=`✗ ANSWER: ${shown}`; fb.className="mathfb bad";
+    fb.className="mathfb bad";
+    let left=10;
+    fb.textContent=`✗ ANSWER: ${shown} — next in ${left}s (⟳ NEW to skip the wait)`;
+    MATH.cdI=setInterval(()=>{
+      left--;
+      if(left>0) fb.textContent=`✗ ANSWER: ${shown} — next in ${left}s (⟳ NEW to skip the wait)`;
+    },1000);
   }
   mathHUD(); lbDraw(); benchDraw();
-  setTimeout(mathNew, ok?650:1400);
+  MATH.nextT=setTimeout(mathNew, ok?650:10000);
 }
 function mathHUD(){
   const avg = MATH.times.length? (MATH.times.reduce((a,b)=>a+b,0)/MATH.times.length).toFixed(1)+"s" : "—";
@@ -1042,7 +1124,7 @@ function renderMath(){
         <div class="cattabs" id="catTabs">${tabs}</div>
         <div class="explainer"><span class="lbl">▸ DRILL BRIEF</span><div class="txt">${brief}</div></div>
         <div class="mathq" id="mathQ"></div>
-        <div class="mathin"><input id="mathA" inputmode="decimal" autocomplete="off" placeholder="answer"><button class="btn" id="mathGo">ENTER</button></div>
+        <div class="mathin"><input id="mathA" inputmode="decimal" autocomplete="off" placeholder="answer"><button class="btn" id="mathGo">ENTER</button><button class="btn ghost" id="mathSkip" title="new problem — no penalty">⟳ NEW</button></div>
         <div class="mathfb" id="mathFB"></div>
         <div class="mathstats">
           <div class="mstat"><div class="v" id="mSolved">0</div><div class="l">SOLVED</div></div>
@@ -1059,7 +1141,7 @@ function renderMath(){
           <thead><tr><th class="rk">#</th><th>DAY</th><th class="num">AVG / PROBLEM</th><th class="num">SOLVED</th></tr></thead>
           <tbody id="lbBody"></tbody>
         </table>
-        <div class="lbnote" id="lbNote"></div>
+        <div class="lbfoot"><div class="lbnote" id="lbNote"></div><button class="btn ghost lbreset" id="lbResetBtn">RESET TODAY</button></div>
       </div>
     </div>
     <div class="panel"><div class="ttl">PROGRESS TO BENCHMARK <span class="r">BEST QUALIFYING DAY vs TARGET · EDIT TGT TO SET</span></div>
@@ -1076,10 +1158,18 @@ function renderMath(){
   });
   $("#catTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ MATH.cat=b.dataset.c; renderMath(); });
   $("#mathGo").onclick=mathCheck;
+  $("#mathSkip").onclick=()=>{ mathNew(); };
   $("#mathA").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); mathCheck(); }});
   const g2=GROUPS[MATH.group];
   const catLabel = MATH.cat===g2.allId ? g2.allLabel : (allCatsById(MATH.cat)||{label:MATH.cat}).label;
   $("#lbCatLabel").textContent = catLabel + " · BEST DAILY AVERAGES · MIN "+LB_MIN_QUALIFY+" SOLVES";
+  $("#lbResetBtn").onclick=()=>{
+    const scope = MATH.cat===g2.allId ? "every "+g2.label+" category" : catLabel;
+    if(!confirm("Reset TODAY's recorded solves for "+scope+"? Past days are untouched.")) return;
+    const n=lbResetToday(MATH.cat);
+    lbDraw(); benchDraw();
+    $("#lbNote").textContent = n ? "Today's record cleared for "+scope+"." : "Nothing recorded today for "+scope+".";
+  };
   mathHUD(); lbDraw(); benchDraw(); mathNew();
 }
 
